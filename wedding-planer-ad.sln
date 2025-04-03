@@ -1,0 +1,25 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio Version 17
+VisualStudioVersion = 17.12.35323.107
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "wedding-planer-ad", "wedding-planer-ad.csproj", "{03663044-E50A-4389-B95D-2393A1EB7855}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{03663044-E50A-4389-B95D-2393A1EB7855}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{03663044-E50A-4389-B95D-2393A1EB7855}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{03663044-E50A-4389-B95D-2393A1EB7855}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{03663044-E50A-4389-B95D-2393A1EB7855}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {86B5A857-EFC6-49F4-8474-09EC1D409748}
+	EndGlobalSection
+EndGlobal

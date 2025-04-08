@@ -1,0 +1,35 @@
+﻿@model IEnumerable<wedding_planer_ad.Models.WeddingTimeline>
+
+@{
+    Layout = "~/Views/WeddingPlanners/_WeddingPlannerLayout.cshtml";
+    ViewData["Title"] = "Wedding planner Dashboard";
+}
+
+<h2>Wedding Timeline</h2>
+
+@if (!Model.Any())
+{
+    <div class="alert alert-info">No Timelines found for wedding.</div>
+}
+else
+{
+    <table class="table table-bordered">
+        <thead>
+            <tr>
+                <th>Event Name</th>
+                <th>Event Time</th>
+                <th>Event Description</th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var member in Model)
+            {
+                <tr>
+                    <td>@member.EventName</td>
+                    <td>@member.EventTime</td>
+                    <td>@member.EventDescription</td>
+                </tr>
+            }
+        </tbody>
+    </table>
+}

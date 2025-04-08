@@ -1,0 +1,47 @@
+﻿@model IEnumerable<wedding_planer_ad.Models.Couple>
+@using Microsoft.AspNetCore.Identity
+@inject SignInManager<ApplicationUser> SignInManager
+@inject UserManager<ApplicationUser> UserManager
+
+@{
+    Layout = "~/Views/WeddingPlanners/_WeddingPlannerLayout.cshtml";
+    ViewData["Title"] = "Wedding planner Dashboard";
+}
+
+<h2>@ViewData["Weddings"]</h2>
+
+@if (!Model.Any())
+{
+    <div class="alert alert-info">You are not assigned to any weddings yet.</div>
+}
+else
+{
+    <table class="table table-bordered">
+        <thead>
+            <tr>
+                <th>Wedding Date</th>
+                <th>Budget</th>
+                <th>Guests</th>
+                <th>Checklist</th>
+                <th>Timeline</th>
+                <th>Bookings</th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var wedding in Model)
+            {
+                <tr>
+                    <td>@wedding.WeddingDate.ToShortDateString()</td>
+                    <td>Rs. @wedding.Budget</td>
+                    <td><a href="@Url.Action("ViewGuests", new { coupleId = wedding.Id })" class="btn btn-info">View Guests</a></td>
+                    <td><a href="@Url.Action("ViewChecklists", new { coupleId = wedding.Id })" class="btn btn-secondary">View Checklist</a></td>
+                    <td><a href="@Url.Action("ViewWeddingTimeline", new { coupleId = wedding.Id })" class="btn btn-primary">View Timeline</a></td>
+
+                    <td>
+                        <a href="@Url.Action("ViewWeddingBooking", new { coupleId = wedding.Id })" class="btn btn-success">View Bookings</a>
+                    </td>
+                </tr>
+            }
+        </tbody>
+    </table>
+}

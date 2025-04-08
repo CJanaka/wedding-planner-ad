@@ -1,0 +1,48 @@
+﻿@model wedding_planer_ad.Models.WeddingPlanner
+
+@{
+    ViewData["Title"] = "Create";
+}
+
+<h1>Create</h1>
+
+<h4>WeddingPlanner</h4>
+<hr />
+<div class="row">
+    <div class="col-md-4">
+        <form asp-action="Create">
+            <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+            <div class="form-group">
+                <label asp-for="PlannerUserId" class="control-label"></label>
+                <input asp-for="PlannerUserId" class="form-control" />
+                <span asp-validation-for="PlannerUserId" class="text-danger"></span>
+            </div>
+            <div class="form-group">
+                <label asp-for="CoupleId" class="control-label"></label>
+                <input asp-for="CoupleId" class="form-control" />
+                <span asp-validation-for="CoupleId" class="text-danger"></span>
+            </div>
+            <div class="form-group">
+                <label asp-for="AssignedDate" class="control-label"></label>
+                <input asp-for="AssignedDate" class="form-control" />
+                <span asp-validation-for="AssignedDate" class="text-danger"></span>
+            </div>
+            <div class="form-group form-check">
+                <label class="form-check-label">
+                    <input class="form-check-input" asp-for="IsDeleted" /> @Html.DisplayNameFor(model => model.IsDeleted)
+                </label>
+            </div>
+            <div class="form-group">
+                <input type="submit" value="Create" class="btn btn-primary" />
+            </div>
+        </form>
+    </div>
+</div>
+
+<div>
+    <a asp-action="Index">Back to List</a>
+</div>
+
+@section Scripts {
+    @{await Html.RenderPartialAsync("_ValidationScriptsPartial");}
+}

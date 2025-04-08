@@ -70,8 +70,8 @@ app.MapRazorPages();
 //    context.Response.Redirect("/Identity/Account/Login");
 //    return Task.CompletedTask;
 //});
-app.MapRazorPages(); 
-app.MapDefaultControllerRoute();
+//app.MapRazorPages(); 
+//app.MapDefaultControllerRoute();
 
 
 

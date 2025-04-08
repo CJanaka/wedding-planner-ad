@@ -1,57 +1,127 @@
 is_global = true
 build_property.TargetFramework = net8.0
+build_property.TargetFramework = net8.0
+build_property.TargetPlatformMinVersion = 
 build_property.TargetPlatformMinVersion = 
 build_property.UsingMicrosoftNETSdkWeb = true
+build_property.UsingMicrosoftNETSdkWeb = true
+build_property.ProjectTypeGuids = 
 build_property.ProjectTypeGuids = 
 build_property.InvariantGlobalization = 
+build_property.InvariantGlobalization = 
+build_property.PlatformNeutralAssembly = 
 build_property.PlatformNeutralAssembly = 
 build_property.EnforceExtendedAnalyzerRules = 
+build_property.EnforceExtendedAnalyzerRules = 
+build_property._SupportedPlatformList = Linux,macOS,Windows
 build_property._SupportedPlatformList = Linux,macOS,Windows
 build_property.RootNamespace = wedding_planer_ad
 build_property.RootNamespace = wedding_planer_ad
-build_property.ProjectDir = E:\ESO\practicles\wedding-planer-ad\
+build_property.ProjectDir = E:\Files\Esoft\AD\WeddingPlanner\wedding-planner-ad\
 build_property.EnableComHosting = 
 build_property.EnableGeneratedComInterfaceComImportInterop = 
 build_property.RazorLangVersion = 8.0
 build_property.SupportLocalizedComponentNames = 
 build_property.GenerateRazorMetadataSourceChecksumAttributes = 
-build_property.MSBuildProjectDirectory = E:\ESO\practicles\wedding-planer-ad
+build_property.MSBuildProjectDirectory = E:\Files\Esoft\AD\WeddingPlanner\wedding-planner-ad
 build_property._RazorSourceGeneratorDebug = 
-build_property.EffectiveAnalysisLevelStyle = 8.0
-build_property.EnableCodeStyleSeverity = 
 
-[E:/ESO/practicles/wedding-planer-ad/Areas/Identity/Pages/_ViewStart.cshtml]
+[E:/Files/Esoft/AD/WeddingPlanner/wedding-planner-ad/Areas/Identity/Pages/Account/Login.cshtml]
+build_metadata.AdditionalFiles.TargetPath = QXJlYXNcSWRlbnRpdHlcUGFnZXNcQWNjb3VudFxMb2dpbi5jc2h0bWw=
+build_metadata.AdditionalFiles.CssScope = 
+
+[E:/Files/Esoft/AD/WeddingPlanner/wedding-planner-ad/Areas/Identity/Pages/Account/_ViewImports.cshtml]
+build_metadata.AdditionalFiles.TargetPath = QXJlYXNcSWRlbnRpdHlcUGFnZXNcQWNjb3VudFxfVmlld0ltcG9ydHMuY3NodG1s
+build_metadata.AdditionalFiles.CssScope = 
+
+[E:/Files/Esoft/AD/WeddingPlanner/wedding-planner-ad/Areas/Identity/Pages/_ValidationScriptsPartial.cshtml]
+build_metadata.AdditionalFiles.TargetPath = QXJlYXNcSWRlbnRpdHlcUGFnZXNcX1ZhbGlkYXRpb25TY3JpcHRzUGFydGlhbC5jc2h0bWw=
+build_metadata.AdditionalFiles.CssScope = 
+
+[E:/Files/Esoft/AD/WeddingPlanner/wedding-planner-ad/Areas/Identity/Pages/_ViewImports.cshtml]
+build_metadata.AdditionalFiles.TargetPath = QXJlYXNcSWRlbnRpdHlcUGFnZXNcX1ZpZXdJbXBvcnRzLmNzaHRtbA==
+build_metadata.AdditionalFiles.CssScope = 
+
+[E:/Files/Esoft/AD/WeddingPlanner/wedding-planner-ad/Areas/Identity/Pages/_ViewStart.cshtml]
 build_metadata.AdditionalFiles.TargetPath = QXJlYXNcSWRlbnRpdHlcUGFnZXNcX1ZpZXdTdGFydC5jc2h0bWw=
 build_metadata.AdditionalFiles.CssScope = 
 
-[E:/ESO/practicles/wedding-planer-ad/Views/Home/Index.cshtml]
+[E:/Files/Esoft/AD/WeddingPlanner/wedding-planner-ad/Views/Home/Index.cshtml]
 build_metadata.AdditionalFiles.TargetPath = Vmlld3NcSG9tZVxJbmRleC5jc2h0bWw=
 build_metadata.AdditionalFiles.CssScope = 
 
-[E:/ESO/practicles/wedding-planer-ad/Views/Home/Privacy.cshtml]
+[E:/Files/Esoft/AD/WeddingPlanner/wedding-planner-ad/Views/Home/Privacy.cshtml]
 build_metadata.AdditionalFiles.TargetPath = Vmlld3NcSG9tZVxQcml2YWN5LmNzaHRtbA==
 build_metadata.AdditionalFiles.CssScope = 
 
-[E:/ESO/practicles/wedding-planer-ad/Views/Shared/Error.cshtml]
+[E:/Files/Esoft/AD/WeddingPlanner/wedding-planner-ad/Views/Shared/Error.cshtml]
 build_metadata.AdditionalFiles.TargetPath = Vmlld3NcU2hhcmVkXEVycm9yLmNzaHRtbA==
 build_metadata.AdditionalFiles.CssScope = 
 
-[E:/ESO/practicles/wedding-planer-ad/Views/Shared/_LoginPartial.cshtml]
+[E:/Files/Esoft/AD/WeddingPlanner/wedding-planner-ad/Views/Shared/_LoginPartial.cshtml]
 build_metadata.AdditionalFiles.TargetPath = Vmlld3NcU2hhcmVkXF9Mb2dpblBhcnRpYWwuY3NodG1s
 build_metadata.AdditionalFiles.CssScope = 
 
-[E:/ESO/practicles/wedding-planer-ad/Views/Shared/_ValidationScriptsPartial.cshtml]
+[E:/Files/Esoft/AD/WeddingPlanner/wedding-planner-ad/Views/Shared/_ValidationScriptsPartial.cshtml]
 build_metadata.AdditionalFiles.TargetPath = Vmlld3NcU2hhcmVkXF9WYWxpZGF0aW9uU2NyaXB0c1BhcnRpYWwuY3NodG1s
 build_metadata.AdditionalFiles.CssScope = 
 
-[E:/ESO/practicles/wedding-planer-ad/Views/_ViewImports.cshtml]
+[E:/Files/Esoft/AD/WeddingPlanner/wedding-planner-ad/Views/WeddingPlanners/Create.cshtml]
+build_metadata.AdditionalFiles.TargetPath = Vmlld3NcV2VkZGluZ1BsYW5uZXJzXENyZWF0ZS5jc2h0bWw=
+build_metadata.AdditionalFiles.CssScope = 
+
+[E:/Files/Esoft/AD/WeddingPlanner/wedding-planner-ad/Views/WeddingPlanners/Delete.cshtml]
+build_metadata.AdditionalFiles.TargetPath = Vmlld3NcV2VkZGluZ1BsYW5uZXJzXERlbGV0ZS5jc2h0bWw=
+build_metadata.AdditionalFiles.CssScope = 
+
+[E:/Files/Esoft/AD/WeddingPlanner/wedding-planner-ad/Views/WeddingPlanners/Details.cshtml]
+build_metadata.AdditionalFiles.TargetPath = Vmlld3NcV2VkZGluZ1BsYW5uZXJzXERldGFpbHMuY3NodG1s
+build_metadata.AdditionalFiles.CssScope = 
+
+[E:/Files/Esoft/AD/WeddingPlanner/wedding-planner-ad/Views/WeddingPlanners/Edit.cshtml]
+build_metadata.AdditionalFiles.TargetPath = Vmlld3NcV2VkZGluZ1BsYW5uZXJzXEVkaXQuY3NodG1s
+build_metadata.AdditionalFiles.CssScope = 
+
+[E:/Files/Esoft/AD/WeddingPlanner/wedding-planner-ad/Views/WeddingPlanners/Index.cshtml]
+build_metadata.AdditionalFiles.TargetPath = Vmlld3NcV2VkZGluZ1BsYW5uZXJzXEluZGV4LmNzaHRtbA==
+build_metadata.AdditionalFiles.CssScope = 
+
+[E:/Files/Esoft/AD/WeddingPlanner/wedding-planner-ad/Views/WeddingPlanners/MyWeddings.cshtml]
+build_metadata.AdditionalFiles.TargetPath = Vmlld3NcV2VkZGluZ1BsYW5uZXJzXE15V2VkZGluZ3MuY3NodG1s
+build_metadata.AdditionalFiles.CssScope = 
+
+[E:/Files/Esoft/AD/WeddingPlanner/wedding-planner-ad/Views/WeddingPlanners/ViewChecklists.cshtml]
+build_metadata.AdditionalFiles.TargetPath = Vmlld3NcV2VkZGluZ1BsYW5uZXJzXFZpZXdDaGVja2xpc3RzLmNzaHRtbA==
+build_metadata.AdditionalFiles.CssScope = 
+
+[E:/Files/Esoft/AD/WeddingPlanner/wedding-planner-ad/Views/WeddingPlanners/ViewGuests.cshtml]
+build_metadata.AdditionalFiles.TargetPath = Vmlld3NcV2VkZGluZ1BsYW5uZXJzXFZpZXdHdWVzdHMuY3NodG1s
+build_metadata.AdditionalFiles.CssScope = 
+
+[E:/Files/Esoft/AD/WeddingPlanner/wedding-planner-ad/Views/WeddingPlanners/ViewMembers.cshtml]
+build_metadata.AdditionalFiles.TargetPath = Vmlld3NcV2VkZGluZ1BsYW5uZXJzXFZpZXdNZW1iZXJzLmNzaHRtbA==
+build_metadata.AdditionalFiles.CssScope = 
+
+[E:/Files/Esoft/AD/WeddingPlanner/wedding-planner-ad/Views/WeddingPlanners/ViewWeddingBooking.cshtml]
+build_metadata.AdditionalFiles.TargetPath = Vmlld3NcV2VkZGluZ1BsYW5uZXJzXFZpZXdXZWRkaW5nQm9va2luZy5jc2h0bWw=
+build_metadata.AdditionalFiles.CssScope = 
+
+[E:/Files/Esoft/AD/WeddingPlanner/wedding-planner-ad/Views/WeddingPlanners/ViewWeddingTimeline.cshtml]
+build_metadata.AdditionalFiles.TargetPath = Vmlld3NcV2VkZGluZ1BsYW5uZXJzXFZpZXdXZWRkaW5nVGltZWxpbmUuY3NodG1s
+build_metadata.AdditionalFiles.CssScope = 
+
+[E:/Files/Esoft/AD/WeddingPlanner/wedding-planner-ad/Views/WeddingPlanners/_WeddingPlannerLayout.cshtml]
+build_metadata.AdditionalFiles.TargetPath = Vmlld3NcV2VkZGluZ1BsYW5uZXJzXF9XZWRkaW5nUGxhbm5lckxheW91dC5jc2h0bWw=
+build_metadata.AdditionalFiles.CssScope = 
+
+[E:/Files/Esoft/AD/WeddingPlanner/wedding-planner-ad/Views/_ViewImports.cshtml]
 build_metadata.AdditionalFiles.TargetPath = Vmlld3NcX1ZpZXdJbXBvcnRzLmNzaHRtbA==
 build_metadata.AdditionalFiles.CssScope = 
 
-[E:/ESO/practicles/wedding-planer-ad/Views/_ViewStart.cshtml]
+[E:/Files/Esoft/AD/WeddingPlanner/wedding-planner-ad/Views/_ViewStart.cshtml]
 build_metadata.AdditionalFiles.TargetPath = Vmlld3NcX1ZpZXdTdGFydC5jc2h0bWw=
 build_metadata.AdditionalFiles.CssScope = 
 
-[E:/ESO/practicles/wedding-planer-ad/Views/Shared/_Layout.cshtml]
+[E:/Files/Esoft/AD/WeddingPlanner/wedding-planner-ad/Views/Shared/_Layout.cshtml]
 build_metadata.AdditionalFiles.TargetPath = Vmlld3NcU2hhcmVkXF9MYXlvdXQuY3NodG1s
 build_metadata.AdditionalFiles.CssScope = b-1i8mvj5nmn

@@ -1,0 +1,43 @@
+﻿@model IEnumerable<wedding_planer_ad.Models.Booking>
+
+@{
+    Layout = "~/Views/WeddingPlanners/_WeddingPlannerLayout.cshtml";
+    ViewData["Title"] = "Wedding planner Dashboard";
+}
+
+<h2>Wedding Bookings</h2>
+
+@if (!Model.Any())
+{
+    <div class="alert alert-info">No Bookings found for wedding.</div>
+}
+else
+{
+    <table class="table table-bordered">
+        <thead>
+            <tr>
+                <th>Vendor Id</th>
+                <th>Service Id</th>
+                <th>Service Details</th>
+                <th>Booked Date</th>
+                <th>Total Amount</th>
+                <th>Status</th>
+                <th>Payment Status</th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var member in Model)
+            {
+                <tr>
+                    <td>@member.VendorId</td>
+                    <td>@member.ServiceId</td>
+                    <td>@member.ServiceDetails</td>
+                    <td>@member.BookingDate</td>
+                    <td>@member.TotalAmount</td>
+                    <td>@member.Status</td>
+                    <td>@member.PaymentStatus</td>
+                </tr>
+            }
+        </tbody>
+    </table>
+}

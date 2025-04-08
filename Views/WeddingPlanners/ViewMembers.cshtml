@@ -1,0 +1,35 @@
+﻿@model IEnumerable<wedding_planer_ad.Models.CoupleMember>
+
+@{
+    Layout = "~/Views/WeddingPlanners/_WeddingPlannerLayout.cshtml";
+    ViewData["Title"] = "Wedding planner Dashboard";
+}
+
+<h2>Couple Members</h2>
+
+@if (!Model.Any())
+{
+    <div class="alert alert-info">No members found.</div>
+}
+else
+{
+    <table class="table table-bordered">
+        <thead>
+            <tr>
+                <th>Member ID</th>
+                <th>User ID</th>
+                <th>Is Deleted</th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var member in Model)
+            {
+                <tr>
+                    <td>@member.Id</td>
+                    <td>@member.UserId</td>
+                    <td>@member.IsDeleted</td>
+                </tr>
+            }
+        </tbody>
+    </table>
+}

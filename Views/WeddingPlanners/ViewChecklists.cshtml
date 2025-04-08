@@ -1,0 +1,37 @@
+﻿@model IEnumerable<wedding_planer_ad.Models.WeddingChecklist>
+
+@{
+    Layout = "~/Views/WeddingPlanners/_WeddingPlannerLayout.cshtml";
+    ViewData["Title"] = "Wedding planner Dashboard";
+}
+
+<h2>Wedding Checklist</h2>
+
+@if (!Model.Any())
+{
+    <div class="alert alert-info">No checkist found for wedding.</div>
+}
+else
+{
+    <table class="table table-bordered">
+        <thead>
+            <tr>
+                <th>Task Name</th>
+                <th>Task Description</th>
+                <th>Task Status</th>
+                <th>Due Date</th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var member in Model)
+            {
+                <tr>
+                    <td>@member.TaskName</td>
+                    <td>@member.TaskDescription</td>
+                    <td>@member.TaskStatus</td>
+                    <td>@member.DueDate</td>
+                </tr>
+            }
+        </tbody>
+    </table>
+}

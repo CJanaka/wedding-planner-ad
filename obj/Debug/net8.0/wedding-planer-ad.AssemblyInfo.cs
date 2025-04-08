@@ -16,7 +16,7 @@ using System.Reflection;
 [assembly: System.Reflection.AssemblyCompanyAttribute("wedding-planer-ad")]
 [assembly: System.Reflection.AssemblyConfigurationAttribute("Debug")]
 [assembly: System.Reflection.AssemblyFileVersionAttribute("1.0.0.0")]
-[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0")]
+[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+2d50f400239e54beed54a4a6de3481bd791b792d")]
 [assembly: System.Reflection.AssemblyProductAttribute("wedding-planer-ad")]
 [assembly: System.Reflection.AssemblyTitleAttribute("wedding-planer-ad")]
 [assembly: System.Reflection.AssemblyVersionAttribute("1.0.0.0")]

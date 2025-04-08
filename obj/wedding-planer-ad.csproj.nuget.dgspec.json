@@ -1,23 +1,23 @@
 {
   "format": 1,
   "restore": {
-    "E:\\ESO\\practicles\\wedding-planer-ad\\wedding-planer-ad.csproj": {}
+    "E:\\Files\\Esoft\\AD\\WeddingPlanner\\wedding-planner-ad\\wedding-planer-ad.csproj": {}
   },
   "projects": {
-    "E:\\ESO\\practicles\\wedding-planer-ad\\wedding-planer-ad.csproj": {
+    "E:\\Files\\Esoft\\AD\\WeddingPlanner\\wedding-planner-ad\\wedding-planer-ad.csproj": {
       "version": "1.0.0",
       "restore": {
-        "projectUniqueName": "E:\\ESO\\practicles\\wedding-planer-ad\\wedding-planer-ad.csproj",
+        "projectUniqueName": "E:\\Files\\Esoft\\AD\\WeddingPlanner\\wedding-planner-ad\\wedding-planer-ad.csproj",
         "projectName": "wedding-planer-ad",
-        "projectPath": "E:\\ESO\\practicles\\wedding-planer-ad\\wedding-planer-ad.csproj",
-        "packagesPath": "C:\\Users\\nv99c\\.nuget\\packages\\",
-        "outputPath": "E:\\ESO\\practicles\\wedding-planer-ad\\obj\\",
+        "projectPath": "E:\\Files\\Esoft\\AD\\WeddingPlanner\\wedding-planner-ad\\wedding-planer-ad.csproj",
+        "packagesPath": "C:\\Users\\thuus\\.nuget\\packages\\",
+        "outputPath": "E:\\Files\\Esoft\\AD\\WeddingPlanner\\wedding-planner-ad\\obj\\",
         "projectStyle": "PackageReference",
         "fallbackFolders": [
-          "E:\\ESO\\Shared\\NuGetPackages"
+          "C:\\Program Files (x86)\\Microsoft Visual Studio\\Shared\\NuGetPackages"
         ],
         "configFilePaths": [
-          "C:\\Users\\nv99c\\AppData\\Roaming\\NuGet\\NuGet.Config",
+          "C:\\Users\\thuus\\AppData\\Roaming\\NuGet\\NuGet.Config",
           "C:\\Program Files (x86)\\NuGet\\Config\\Microsoft.VisualStudio.FallbackLocation.config",
           "C:\\Program Files (x86)\\NuGet\\Config\\Microsoft.VisualStudio.Offline.config"
         ],
@@ -26,6 +26,7 @@
         ],
         "sources": {
           "C:\\Program Files (x86)\\Microsoft SDKs\\NuGetPackages\\": {},
+          "C:\\Program Files\\dotnet\\library-packs": {},
           "https://api.nuget.org/v3/index.json": {}
         },
         "frameworks": {
@@ -42,9 +43,8 @@
         "restoreAuditProperties": {
           "enableAudit": "true",
           "auditLevel": "low",
-          "auditMode": "all"
-        },
-        "SdkAnalysisLevel": "9.0.100"
+          "auditMode": "direct"
+        }
       },
       "frameworks": {
         "net8.0": {
@@ -96,7 +96,7 @@
               "privateAssets": "all"
             }
           },
-          "runtimeIdentifierGraphPath": "C:\\Program Files\\dotnet\\sdk\\9.0.100-rc.1.24452.12/PortableRuntimeIdentifierGraph.json"
+          "runtimeIdentifierGraphPath": "C:\\Program Files\\dotnet\\sdk\\8.0.401/PortableRuntimeIdentifierGraph.json"
         }
       }
     }

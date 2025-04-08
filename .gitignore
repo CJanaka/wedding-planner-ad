@@ -369,3 +369,6 @@ FodyWeavers.xsd
 
 # Local files
 appsettings.Development.json
+
+.\bin
+.\obj

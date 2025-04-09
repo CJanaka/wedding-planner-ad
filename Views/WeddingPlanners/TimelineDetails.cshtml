@@ -1,0 +1,55 @@
+﻿@model wedding_planer_ad.Models.WeddingTimeline
+
+@{
+    Layout = "~/Views/WeddingPlanners/_WeddingPlannerLayout.cshtml";
+    ViewData["Title"] = "Timeline Details";
+}
+
+<h2>Timeline Details</h2>
+
+<style>
+    .form-group {
+        margin-bottom: 1.5rem; /* Similar to Bootstrap's mb-4 */
+    }
+
+    .form-actions {
+        display: flex;
+        gap: 10px; /* Small gap between buttons */
+        justify-content: flex-start;
+        margin-top: 1.5rem;
+    }
+
+        .form-actions .btn {
+            min-width: 120px; /* Ensures both buttons have the same width */
+            margin-right:5%;
+        }
+</style>
+
+<!-- Timeline Form (Update and Delete in the same form) -->
+<form asp-action="UpdateTimeline" method="post">
+    <input type="hidden" asp-for="Id" />
+    <input type="hidden" name="CoupleId" value="@Model.CoupleId" /> <!-- Pass the CoupleId as hidden -->
+
+    <div class="form-group">
+        <label asp-for="EventName"></label>
+        <input asp-for="EventName" class="form-control" />
+    </div>
+
+    <div class="form-group">
+        <label asp-for="EventTime"></label>
+        <input asp-for="EventTime" class="form-control" type="datetime-local" />
+    </div>
+
+    <div class="form-group">
+        <label asp-for="EventDescription"></label>
+        <textarea asp-for="EventDescription" class="form-control"></textarea>
+    </div>
+
+    <!-- Flex container for buttons -->
+    <div class="form-actions">
+        <button type="submit" class="btn btn-primary">Update</button>
+
+        <!-- Delete button (inside the same form) -->
+        <button type="submit" class="btn btn-danger" name="delete" value="true" onclick="return confirm('Are you sure you want to delete this timeline event?');">Delete</button>
+    </div>
+</form>

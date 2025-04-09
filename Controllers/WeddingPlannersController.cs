@@ -146,6 +146,7 @@ namespace wedding_planer_ad.Controllers
 
         public async Task<IActionResult> ViewWeddingTimeline(int coupleId)
         {
+            ViewBag.CoupleId = coupleId;
             var guests = await _plannerService.GetTimelineByCoupleIdAsync(coupleId);
             return View(guests);
         }
@@ -155,6 +156,88 @@ namespace wedding_planer_ad.Controllers
             var guests = await _plannerService.GetBookingByCoupleId(coupleId);
             return View(guests);
         }
+
+        public async Task<IActionResult> TimelineDetails(int id)
+        {
+            var item = await _plannerService.GetTimelineByIdAsync(id);
+            if (item == null)
+                return NotFound();
+
+            return View(item);
+        }
+
+        [HttpPost]
+        public async Task<IActionResult> UpdateTimeline(WeddingTimeline timeline, bool delete = false)
+        {
+            if (delete)
+            {
+                var existingTimeline = await _plannerService.GetTimelineByIdAsync(timeline.Id);
+                if (existingTimeline == null)
+                {
+                    return NotFound();
+                }
+
+                // Delete timeline logic
+                await _plannerService.DeleteTimelineAsync(timeline.Id);
+
+                return RedirectToAction("ViewWeddingTimeline", new { coupleId = timeline.CoupleId });
+            }
+
+            // Update timeline logic
+            await _plannerService.UpdateTimelineAsync(timeline);
+
+            return RedirectToAction("ViewWeddingTimeline", new { coupleId = timeline.CoupleId });
+        }
+
+
+        [HttpPost]
+        public async Task<IActionResult> DeleteTimeline(int id)
+        {
+            var timeline = await _plannerService.GetTimelineByIdAsync(id);
+            if (timeline == null)
+            {
+                return NotFound();
+            }
+
+            int coupleId = timeline.CoupleId;
+
+            await _plannerService.DeleteTimelineAsync(id);
+
+            return RedirectToAction("ViewWeddingTimeline", new { coupleId = coupleId });
+        }
+
+
+        [HttpGet]
+        public IActionResult AddTimeline(int coupleId)
+        {
+            var model = new WeddingTimeline
+            {
+                CoupleId = coupleId
+            };
+
+            return View(model);
+        }
+
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> AddTimeline(WeddingTimeline timeline)
+        {
+            if (!ModelState.IsValid)
+                return View(timeline);
+
+            try
+            {
+                await _plannerService.AddTimelineAsync(timeline);
+                return RedirectToAction("ViewWeddingTimeline", new { coupleId = timeline.CoupleId });
+            }
+            catch (ArgumentException ex)
+            {
+                ModelState.AddModelError("CoupleId", ex.Message);
+                return View(timeline); 
+            }
+        }
+
+
 
 
     }

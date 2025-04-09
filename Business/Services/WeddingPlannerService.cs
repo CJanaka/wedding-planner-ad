@@ -1,4 +1,5 @@
-﻿using Microsoft.EntityFrameworkCore;
+﻿using Microsoft.AspNetCore.Identity;
+using Microsoft.EntityFrameworkCore;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
@@ -6,16 +7,20 @@ using wedding_planer_ad.Business.Interfaces;
 using wedding_planer_ad.Data;
 using wedding_planer_ad.Exceptions;
 using wedding_planer_ad.Models;
+using wedding_planer_ad.Models.DTO;
 
 namespace wedding_planer_ad.Business.Services
 {
     public class WeddingPlannerService : IWeddingPlannerService
     {
         private readonly ApplicationDbContext _context;
+        private readonly UserManager<ApplicationUser> _userManager;
 
-        public WeddingPlannerService(ApplicationDbContext context)
+
+        public WeddingPlannerService(ApplicationDbContext context, UserManager<ApplicationUser> userManager)
         {
             _context = context;
+            _userManager = userManager;
         }
 
         public async Task<IEnumerable<WeddingPlanner>> GetAllAsync()
@@ -104,11 +109,33 @@ namespace wedding_planer_ad.Business.Services
                 .ToListAsync();
         }
 
-        public async Task<IEnumerable<CoupleMember>> GetMembersByCoupleIdAsync(int coupleId)
+        public async Task<IEnumerable<CoupleMemberDto>> GetMembersByCoupleIdAsync(int coupleId)
         {
-            return await _context.CoupleMember
+            var members = await _context.CoupleMember
                 .Where(cm => cm.CoupleId == coupleId && !cm.IsDeleted)
                 .ToListAsync();
+
+            var result = new List<CoupleMemberDto>();
+            Console.Write(result);
+
+            foreach (var member in members)
+            {
+                Console.WriteLine(member);
+
+                var user = await _userManager.FindByIdAsync(member.UserId);
+                if (user != null)
+                {
+                    result.Add(new CoupleMemberDto
+                    {
+                        Id = member.Id,
+                        UserId = member.UserId,
+                        UserName = user.UserName ?? string.Empty,
+                        Email = user.Email ?? string.Empty
+                    });
+                }
+            }
+
+            return result;
         }
 
         public async Task<IEnumerable<Guest>> GetGuestsByCoupleIdAsync(int coupleId)
@@ -138,6 +165,47 @@ namespace wedding_planer_ad.Business.Services
                 .Where(wb => wb.CoupleId == coupleId && !wb.IsDeleted)
                 .ToListAsync();
         }
+
+        public async Task<WeddingTimeline> GetTimelineByIdAsync(int id)
+        {
+            return await _context.WeddingTimeline.FirstOrDefaultAsync(t => t.Id == id);
+        }
+
+        public async Task UpdateTimelineAsync(WeddingTimeline timeline)
+        {
+            _context.WeddingTimeline.Update(timeline);
+            await _context.SaveChangesAsync();
+        }
+
+        public async Task DeleteTimelineAsync(int id)
+        {
+            var timeline = await _context.WeddingTimeline.FindAsync(id);
+            if (timeline != null)
+            {
+                _context.WeddingTimeline.Remove(timeline);
+                await _context.SaveChangesAsync();
+            }
+        }
+
+        public async Task AddTimelineAsync(WeddingTimeline timeline)
+        {
+            var coupleExists = await _context.Couple.AnyAsync(c => c.Id == timeline.CoupleId);
+            Console.WriteLine($"CoupleId {timeline.CoupleId} exists: {coupleExists}");
+
+            if (!coupleExists)
+            {
+                Console.WriteLine($"Invalid Couple ID: {timeline.CoupleId}");
+                throw new ArgumentException("Invalid Couple ID. The couple does not exist.");
+            }
+
+            _context.WeddingTimeline.Add(timeline);
+            await _context.SaveChangesAsync();
+            Console.WriteLine("Timeline added successfully.");
+        }
+
+
+
+
 
 
     }

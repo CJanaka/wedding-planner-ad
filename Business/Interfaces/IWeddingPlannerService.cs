@@ -1,5 +1,6 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using wedding_planer_ad.Models;
+using wedding_planer_ad.Models.DTO;
 
 namespace wedding_planer_ad.Business.Interfaces
 {
@@ -16,7 +17,7 @@ namespace wedding_planer_ad.Business.Interfaces
         Task<IEnumerable<WeddingChecklist>> GetChecklistsByCoupleIdAsync(int coupleId);
        
 
-        Task<IEnumerable<CoupleMember>> GetMembersByCoupleIdAsync(int coupleId);
+        Task<IEnumerable<CoupleMemberDto>> GetMembersByCoupleIdAsync(int coupleId);
 
 
         Task<IEnumerable<Guest>> GetGuestsByCoupleIdAsync(int coupleId);
@@ -26,5 +27,13 @@ namespace wedding_planer_ad.Business.Interfaces
        Task<IEnumerable<WeddingTimeline>> GetTimelineByCoupleIdAsync(int coupleId);
 
          Task<IEnumerable<Booking>> GetBookingByCoupleId(int coupleId);
+
+        Task<WeddingTimeline> GetTimelineByIdAsync(int id);
+        Task UpdateTimelineAsync(WeddingTimeline timeline);
+        Task DeleteTimelineAsync(int id);
+
+        Task AddTimelineAsync(WeddingTimeline timeline);
+
+
     }
 }

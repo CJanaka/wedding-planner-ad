@@ -7,6 +7,9 @@
 
 <h2>Wedding Timeline</h2>
 
+<a asp-action="AddTimeline" asp-route-coupleId="@ViewBag.CoupleId" class="btn btn-primary mb-3">+ Add New Event</a>
+
+
 @if (!Model.Any())
 {
     <div class="alert alert-info">No Timelines found for wedding.</div>
@@ -22,12 +25,12 @@ else
             </tr>
         </thead>
         <tbody>
-            @foreach (var member in Model)
+            @foreach (var item in Model)
             {
-                <tr>
-                    <td>@member.EventName</td>
-                    <td>@member.EventTime</td>
-                    <td>@member.EventDescription</td>
+                <tr onclick="location.href='@Url.Action("TimelineDetails", "WeddingPlanners", new { id = item.Id })'" style="cursor:pointer">
+                    <td>@item.EventName</td>
+                    <td>@item.EventTime</td>
+                    <td>@item.EventDescription</td>
                 </tr>
             }
         </tbody>

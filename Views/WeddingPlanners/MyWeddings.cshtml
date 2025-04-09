@@ -21,7 +21,7 @@ else
             <tr>
                 <th>Wedding Date</th>
                 <th>Budget</th>
-                <th>Guests</th>
+                <th>Couple</th>
                 <th>Checklist</th>
                 <th>Timeline</th>
                 <th>Bookings</th>
@@ -33,7 +33,7 @@ else
                 <tr>
                     <td>@wedding.WeddingDate.ToShortDateString()</td>
                     <td>Rs. @wedding.Budget</td>
-                    <td><a href="@Url.Action("ViewGuests", new { coupleId = wedding.Id })" class="btn btn-info">View Guests</a></td>
+                    <td><a href="@Url.Action("ViewMembers", new { coupleId = wedding.Id })" class="btn btn-info">View Couple</a></td>
                     <td><a href="@Url.Action("ViewChecklists", new { coupleId = wedding.Id })" class="btn btn-secondary">View Checklist</a></td>
                     <td><a href="@Url.Action("ViewWeddingTimeline", new { coupleId = wedding.Id })" class="btn btn-primary">View Timeline</a></td>
 

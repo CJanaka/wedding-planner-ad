@@ -2,6 +2,7 @@
     For more information on enabling MVC for empty projects, visit https://go.microsoft.com/fwlink/?LinkID=397860
 *@
 @{
+    Layout = "~/Views/WeddingPlanners/_WeddingPlannerLayout.cshtml";
     ViewData["Title"] = "Wedding Dashboard";
 }
 
@@ -34,21 +35,21 @@
                 <div class="card-body">
                     <div class="progress mb-3">
                         <div class="progress-bar" role="progressbar"
-                             style="width: @(Model.TotalBudget > 0 ? (Model.SpentBudget / Model.TotalBudget) * 100 : 0)%"
-                             aria-valuenow="@Model.SpentBudget" aria-valuemin="0" aria-valuemax="@Model.TotalBudget">
+                             style="width: @(Model.Budgets.AllocatedAmount > 0 ? (Model.Budgets.SpentAmount / Model.Budgets.AllocatedAmount) * 100 : 0)%"
+                             aria-valuenow="@Model.Budgets.SpentAmount" aria-valuemin="0" aria-valuemax="@Model.Budgets.AllocatedAmount">
                         </div>
                     </div>
                     <div class="d-flex justify-content-between">
                         <span>Total Budget:</span>
-                        <span>$@Model.TotalBudget.ToString("#,##0.00")</span>
+                        <span>$@Model.Budgets.AllocatedAmount.ToString("#,##0.00")</span>
                     </div>
                     <div class="d-flex justify-content-between">
                         <span>Spent:</span>
-                        <span>$@Model.SpentBudget.ToString("#,##0.00")</span>
+                        <span>$@Model.Budgets.SpentAmount.ToString("#,##0.00")</span>
                     </div>
                     <div class="d-flex justify-content-between font-weight-bold">
                         <span>Remaining:</span>
-                        <span>$@((Model.TotalBudget - Model.SpentBudget).ToString("#,##0.00"))</span>
+                        <span>$@((Model.Budgets.AllocatedAmount - Model.Budgets.SpentAmount).ToString("#,##0.00"))</span>
                     </div>
                     <button type="button" class="btn btn-sm btn-outline-primary mt-3" data-bs-toggle="modal" data-bs-target="#budgetModal">
                         Manage Budget
@@ -65,16 +66,16 @@
                 </div>
                 <div class="card-body">
                     <ul class="list-group">
-                        @foreach (var date in Model.ImportantDates.OrderBy(d => d.Date).Take(5))
+                        @foreach (var checklist in Model.Checklists.OrderBy(d => d.DueDate).Take(5))
                         {
                             <li class="list-group-item d-flex justify-content-between align-items-center">
                                 <div>
-                                    <strong>@date.Title</strong>
+                                    <strong>@checklist.TaskName</strong>
                                     <br />
-                                    <small>@date.Date.ToString("MMM d, yyyy")</small>
+                                    <small>@checklist.DueDate.ToString("MMM d, yyyy")</small>
                                 </div>
-                                <span class="badge @(date.IsCompleted ? "bg-success" : (date.Date < DateTime.Today ? "bg-danger" : "bg-primary")) rounded-pill">
-                                    @((date.Date - DateTime.Today).Days) days
+                                <span class="badge @(checklist.IsCompleted ? "bg-success" : (checklist.DueDate < DateTime.Today ? "bg-danger" : "bg-primary")) rounded-pill">
+                                    @((checklist.DueDate - DateTime.Today).Days) days
                                 </span>
                             </li>
                         }
@@ -88,16 +89,18 @@
 
         <!-- Tasks Progress Card -->
         <div class="col-md-4">
+
             <div class="card">
                 <div class="card-header bg-success text-white">
                     <h5 class="mb-0">Planning Progress</h5>
                 </div>
                 <div class="card-body">
                     @{
-                        var totalTasks = Model.TodoCategories.SelectMany(c => c.Items).Count();
-                        var completedTasks = Model.TodoCategories.SelectMany(c => c.Items).Count(t => t.IsCompleted);
+                        var totalTasks = Model.Checklists.Count(c => !c.IsDeleted);
+                        var completedTasks = Model.Checklists.Count(c => c.IsCompleted && !c.IsDeleted);
                         var progressPercentage = totalTasks > 0 ? (completedTasks * 100) / totalTasks : 0;
                     }
+
                     <div class="progress mb-3">
                         <div class="progress-bar bg-success" role="progressbar"
                              style="width: @progressPercentage%"
@@ -105,33 +108,18 @@
                             @progressPercentage%
                         </div>
                     </div>
+
                     <div class="d-flex justify-content-between">
                         <span>Completed Tasks:</span>
                         <span>@completedTasks / @totalTasks</span>
                     </div>
-                    <div class="categories mt-3">
-                        @foreach (var category in Model.TodoCategories)
-                        {
-                            var catTotalTasks = category.Items.Count;
-                            var catCompletedTasks = category.Items.Count(t => t.IsCompleted);
-                            var catProgressPercentage = catTotalTasks > 0 ? (catCompletedTasks * 100) / catTotalTasks : 0;
 
-                            <div class="mb-2">
-                                <small>@category.Name</small>
-                                <div class="progress" style="height: 5px;">
-                                    <div class="progress-bar bg-info" role="progressbar"
-                                         style="width: @catProgressPercentage%"
-                                         aria-valuenow="@catProgressPercentage" aria-valuemin="0" aria-valuemax="100">
-                                    </div>
-                                </div>
-                            </div>
-                        }
-                    </div>
                     <button type="button" class="btn btn-sm btn-outline-success mt-3" data-bs-toggle="modal" data-bs-target="#tasksModal">
                         Manage Tasks
                     </button>
                 </div>
             </div>
+
         </div>
     </div>
 
@@ -144,6 +132,7 @@
                 </div>
                 <div class="card-body">
                     <ul class="nav nav-tabs" id="taskTabs" role="tablist">
+                        @*
                         @foreach (var category in Model.TodoCategories.Select((cat, i) => new { cat, i }))
                         {
                             <li class="nav-item" role="presentation">
@@ -158,9 +147,11 @@
                                     @category.cat.Name
                                 </button>
                             </li>
-                        }
+                        }*@
                     </ul>
                     <div class="tab-content p-3" id="taskTabsContent">
+                    @*
+
                         @foreach (var category in Model.TodoCategories.Select((cat, i) => new { cat, i }))
                         {
                             <div class="tab-pane fade @(category.i == 0 ? "show active" : "")"
@@ -212,8 +203,10 @@
                                     }
                                 </ul>
                             </div>
-                        }
+                        }*@
                     </div>
+
+
                 </div>
             </div>
         </div>
@@ -235,6 +228,7 @@
                                     <th>Status</th>
                                 </tr>
                             </thead>
+                            @*
                             <tbody>
                                 @foreach (var category in Model.BudgetItems
                                 .GroupBy(b => b.Category)
@@ -266,6 +260,7 @@
                                     </tr>
                                 }
                             </tbody>
+                            *@
                         </table>
                     </div>
                 </div>
@@ -286,6 +281,7 @@
             <div class="modal-body">
                 <!-- Tabs for each category -->
                 <ul class="nav nav-pills mb-3" id="modalTaskTabs" role="tablist">
+                @*
                     @foreach (var category in Model.TodoCategories.Select((cat, i) => new { cat, i }))
                     {
                         <li class="nav-item" role="presentation">
@@ -301,8 +297,10 @@
                             </button>
                         </li>
                     }
+                *@
                 </ul>
                 <div class="tab-content" id="modalTaskTabsContent">
+                @*
                     @foreach (var category in Model.TodoCategories.Select((cat, i) => new { cat, i }))
                     {
                         <div class="tab-pane fade @(category.i == 0 ? "show active" : "")"
@@ -359,6 +357,7 @@
                             </table>
                         </div>
                     }
+                *@
                 </div>
             </div>
             <div class="modal-footer">
@@ -382,7 +381,7 @@
                         <input type="hidden" name="dashboardId" value="@Model.Id" />
                         <div class="col-md-8">
                             <label class="form-label">Total Wedding Budget</label>
-                            <input type="number" class="form-control" name="totalBudget" value="@Model.TotalBudget" min="0" step="0.01" />
+                            <input type="number" class="form-control" name="totalBudget" value="@Model.Budgets.AllocatedAmount" min="0" step="0.01" />
                         </div>
                         <div class="col-md-4 d-flex align-items-end">
                             <button type="submit" class="btn btn-primary">Update Total Budget</button>
@@ -423,6 +422,7 @@
                         </tr>
                     </thead>
                     <tbody>
+                    @*
                         @foreach (var item in Model.BudgetItems.OrderBy(b => b.Category))
                         {
                             <tr>
@@ -442,6 +442,7 @@
                                 </td>
                             </tr>
                         }
+                    *@
                     </tbody>
                 </table>
             </div>
@@ -491,14 +492,14 @@
                         </tr>
                     </thead>
                     <tbody>
-                        @foreach (var date in Model.ImportantDates.OrderBy(d => d.Date))
+                        @foreach (var date in Model.Checklists.OrderBy(d => d.DueDate))
                         {
-                            <tr class="@(date.IsCompleted ? "table-success" : (date.Date < DateTime.Today ? "table-danger" : ""))">
-                                <td>@date.Date.ToString("MMM d, yyyy")</td>
-                                <td>@date.Title</td>
-                                <td>@date.Description</td>
+                            <tr class="@(date.IsCompleted ? "table-success" : (date.DueDate < DateTime.Today ? "table-danger" : ""))">
+                                <td>@date.DueDate.ToString("MMM d, yyyy")</td>
+                                <td>@date.TaskName</td>
+                                <td>@date.TaskDescription</td>
                                 <td>@(date.IsCompleted ? "Complete" : "Pending")</td>
-                                <td>@((date.Date - DateTime.Today).Days) days</td>
+                                <td>@((date.DueDate - DateTime.Today).Days) days</td>
                                 <td>
                                     <form asp-action="CompleteImportantDate" method="post" class="d-inline">
                                         <input type="hidden" name="id" value="@date.Id" />
@@ -517,7 +518,7 @@
     </div>
 </div>
 
-@* Edit Budget Item Modals (one for each item) *@
+@* Edit Budget Item Modals (one for each item) 
 @foreach (var item in Model.BudgetItems)
 {
     <div class="modal fade" id="editBudgetItem@(item.Id)" tabindex="-1" aria-hidden="true">
@@ -570,5 +571,5 @@
                 </div>
             </div>
         </div>
-    </div>
+    </div>*@
 }

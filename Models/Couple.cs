@@ -3,6 +3,7 @@
     public class Couple
     {
         public int Id { get; set; }
+        public ApplicationUser User { get; set; }
         public DateTime WeddingDate { get; set; }
         public decimal Budget { get; set; }
         public DateTime CreatedAt { get; set; }
@@ -11,9 +12,9 @@
         public ICollection<CoupleMember> Members { get; set; }
         public ICollection<WeddingChecklist> Checklists { get; set; }
         public ICollection<Guest> Guests { get; set; }
-        public ICollection<WeddingBudget> Budgets { get; set; }
+        public WeddingBudget Budgets { get; set; }
         public ICollection<WeddingTimeline> Timelines { get; set; }
         public ICollection<Booking> Bookings { get; set; }
-        public ICollection<WeddingPlanner> Planners { get; set; }
+        public WeddingPlanner Planners { get; set; }
     }
 }

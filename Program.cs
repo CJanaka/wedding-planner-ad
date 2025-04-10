@@ -16,6 +16,7 @@ builder.Services.AddDbContext<ApplicationDbContext>(options =>
     options.UseMySql(connectionString, ServerVersion.AutoDetect(connectionString)));
 
 builder.Services.AddScoped<IWeddingPlannerService, WeddingPlannerService>();
+builder.Services.AddScoped<ICoupleDashboardService, CoupleDashboardService>();
 
 builder.Services.AddIdentity<ApplicationUser, IdentityRole>(options =>
 {
@@ -65,11 +66,16 @@ app.MapControllerRoute(
     pattern: "{controller=Home}/{action=Index}/{id?}");
 app.MapRazorPages();
 
-//app.MapGet("/", context =>
-//{
-//    context.Response.Redirect("/Identity/Account/Login");
-//    return Task.CompletedTask;
-//});
+app.MapControllerRoute(
+    name: "dashboard",
+    pattern: "{controller=Dashboard}/{action=Dashboard}/{id?}");
+app.MapRazorPages();
+
+app.MapGet("/", context =>
+{
+    context.Response.Redirect("/Identity/Account/Login");
+    return Task.CompletedTask;
+});
 //app.MapRazorPages(); 
 //app.MapDefaultControllerRoute();
 

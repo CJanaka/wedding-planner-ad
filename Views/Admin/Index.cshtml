@@ -1,0 +1,27 @@
+﻿@model IEnumerable<wedding_planer_ad.Models.WeddingPlanner>
+
+@{
+    Layout = "~/Views/Admin/_AdminLayout.cshtml";
+    ViewData["Title"] = "Wedding planner Dashboard";
+}
+
+<h2 class="mb-4">Wedding planner Dashboard</h2>
+
+<div class="row g-4">
+    <div class="col-md-4">
+        <div class="card text-white bg-info h-100">
+            <div class="card-body">
+                <h5 class="card-title">Total Weddings</h5>
+                <p class="card-text fs-3">20</p>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-4">
+        <div class="card text-white bg-info h-100">
+            <div class="card-body">
+                <h5 class="card-title">Completed Weddings</h5>
+                <p class="card-text fs-3">5</p>
+            </div>
+        </div>
+    </div>
+</div>

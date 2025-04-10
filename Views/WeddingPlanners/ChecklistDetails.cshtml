@@ -1,0 +1,61 @@
+﻿@model wedding_planer_ad.Models.WeddingChecklist
+
+@{
+    Layout = "~/Views/WeddingPlanners/_WeddingPlannerLayout.cshtml";
+    ViewData["Title"] = "Checklist Details";
+}
+
+<h2>Checklist Task Details</h2>
+
+<style>
+    .form-group {
+        margin-bottom: 1.5rem;
+    }
+
+    .form-actions {
+        display: flex;
+        gap: 10px;
+        justify-content: flex-start;
+        margin-top: 1.5rem;
+    }
+
+        .form-actions .btn {
+            min-width: 120px;
+            margin-right: 5%;
+        }
+</style>
+
+<form asp-action="SaveChecklistChanges" method="post">
+    <input type="hidden" asp-for="Id" />
+    <input type="hidden" asp-for="CoupleId" />
+
+    <div class="form-group">
+        <label asp-for="TaskName">Task Name</label>
+        <input asp-for="TaskName" class="form-control" />
+    </div>
+
+    <div class="form-group">
+        <label asp-for="TaskDescription">Task Description</label>
+        <textarea asp-for="TaskDescription" class="form-control"></textarea>
+    </div>
+
+    <div class="form-group">
+        <label asp-for="TaskStatus">Task Status</label>
+        <select asp-for="TaskStatus" class="form-control" asp-items="new SelectList(ViewBag.TaskStatusOptions)">
+            <option value="">-- Select Status --</option>
+        </select>
+    </div>
+
+    <div class="form-group">
+        <label asp-for="DueDate">Due Date</label>
+        <input asp-for="DueDate" class="form-control" type="date" />
+    </div>
+
+    <div class="form-actions">
+        <button type="submit" class="btn btn-primary">Update</button>
+        <button type="submit" class="btn btn-danger" name="delete" value="true"
+                onclick="return confirm('Are you sure you want to delete this task?');">
+            Delete
+        </button>
+    </div>
+</form>

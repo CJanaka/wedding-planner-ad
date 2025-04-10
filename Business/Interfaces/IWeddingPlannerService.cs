@@ -34,6 +34,17 @@ namespace wedding_planer_ad.Business.Interfaces
 
         Task AddTimelineAsync(WeddingTimeline timeline);
 
+        Task<WeddingChecklist> GetChecklistByIdAsync(int id);
+
+        Task UpdateChecklistAsync(WeddingChecklist checklist);
+
+        Task DeleteChecklistAsync(int id);
+
+        Task AddChecklistTaskAsync(WeddingChecklist checklist);
+
+        Task<IEnumerable<BookingVendorDTO>> GetBookingByCoupleIdWithVendor(int coupleId);
+
+
 
     }
 }

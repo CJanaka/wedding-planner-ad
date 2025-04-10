@@ -1,4 +1,4 @@
-﻿@model IEnumerable<wedding_planer_ad.Models.Booking>
+﻿@model IEnumerable<wedding_planer_ad.Models.DTO.BookingVendorDTO>
 
 @{
     Layout = "~/Views/WeddingPlanners/_WeddingPlannerLayout.cshtml";
@@ -16,26 +16,22 @@ else
     <table class="table table-bordered">
         <thead>
             <tr>
-                <th>Vendor Id</th>
-                <th>Service Id</th>
+                <th>Vendor Name</th>
+                <th>Vendor Description</th>
+                <th>Vendor Pricing</th>
+                <th>Booking Date</th>
                 <th>Service Details</th>
-                <th>Booked Date</th>
-                <th>Total Amount</th>
-                <th>Status</th>
-                <th>Payment Status</th>
             </tr>
         </thead>
         <tbody>
-            @foreach (var member in Model)
+            @foreach (var item in Model)
             {
                 <tr>
-                    <td>@member.VendorId</td>
-                    <td>@member.ServiceId</td>
-                    <td>@member.ServiceDetails</td>
-                    <td>@member.BookingDate</td>
-                    <td>@member.TotalAmount</td>
-                    <td>@member.Status</td>
-                    <td>@member.PaymentStatus</td>
+                    <td>@item.VendorName</td>
+                    <td>@item.VendorDescription</td>
+                    <td>@item.VendorPricing</td>
+                    <td>@item.BookingDate.ToShortDateString()</td>
+                    <td>@item.ServiceDetails</td>
                 </tr>
             }
         </tbody>

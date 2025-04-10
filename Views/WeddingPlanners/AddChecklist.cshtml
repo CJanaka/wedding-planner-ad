@@ -1,0 +1,34 @@
+﻿@model wedding_planer_ad.Models.WeddingChecklist
+
+@{
+    Layout = "~/Views/WeddingPlanners/_WeddingPlannerLayout.cshtml";
+    ViewData["Title"] = "Add Checklist Task";
+}
+
+<h2>Add Checklist Task</h2>
+
+<form asp-action="AddChecklist" method="post">
+    <input type="hidden" asp-for="CoupleId" />
+
+    <div class="form-group mb-3">
+        <label asp-for="TaskName">Task Name</label>
+        <input asp-for="TaskName" class="form-control" />
+    </div>
+
+    <div class="form-group mb-3">
+        <label asp-for="TaskDescription">Task Description</label>
+        <textarea asp-for="TaskDescription" class="form-control"></textarea>
+    </div>
+
+    <div class="form-group mb-3">
+        <label asp-for="TaskStatus">Task Status</label>
+        <select asp-for="TaskStatus" asp-items="Html.GetEnumSelectList<wedding_planer_ad.Models.TaskStatus>()" class="form-control"></select>
+    </div>
+
+    <div class="form-group mb-3">
+        <label asp-for="DueDate">Due Date</label>
+        <input asp-for="DueDate" type="date" class="form-control" />
+    </div>
+
+    <button type="submit" class="btn btn-success">Add Task</button>
+</form>

@@ -12,8 +12,8 @@ using wedding_planer_ad.Data;
 namespace wedding_planer_ad.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    [Migration("20250408174929_init2")]
-    partial class init2
+    [Migration("20250410100012_init4")]
+    partial class init4
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -1071,7 +1071,7 @@ namespace wedding_planer_ad.Migrations
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
-                    b.HasOne("wedding_planer_ad.Models.Vendor", null)
+                    b.HasOne("wedding_planer_ad.Models.Vendor", "Vendor")
                         .WithMany("Bookings")
                         .HasForeignKey("VendorId")
                         .OnDelete(DeleteBehavior.Cascade)
@@ -1084,6 +1084,8 @@ namespace wedding_planer_ad.Migrations
                     b.HasOne("wedding_planer_ad.Models.Venue", null)
                         .WithMany("Bookings")
                         .HasForeignKey("VenueId");
+
+                    b.Navigation("Vendor");
                 });
 
             modelBuilder.Entity("wedding_planer_ad.Models.CoupleMember", b =>

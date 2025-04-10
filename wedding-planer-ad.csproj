@@ -6,6 +6,7 @@
     <ImplicitUsings>enable</ImplicitUsings>
     <UserSecretsId>aspnet-wedding_planer_ad-c6926643-3862-4f1c-89f0-5ec837e0c143</UserSecretsId>
     <RootNamespace>wedding_planer_ad</RootNamespace>
+	  
   </PropertyGroup>
 
   <ItemGroup>

@@ -1,0 +1,575 @@
+﻿@*
+    For more information on enabling MVC for empty projects, visit https://go.microsoft.com/fwlink/?LinkID=397860
+*@
+@{
+    Layout = "~/Views/WeddingPlanners/_WeddingPlannerLayout.cshtml";
+    ViewData["Title"] = "Wedding Dashboard";
+}
+
+@model Couple
+
+<div class="container-fluid mt-4">
+    <div class="row">
+        <div class="col-md-12">
+            <div class="card">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between align-items-center mb-4">
+                        @*<h2>@Model.Members's Wedding Dashboard</h2>*@
+                        <div class="wedding-date">
+                            <h4>Wedding Date: @Model.WeddingDate.ToString("MMMM d, yyyy")</h4>
+                            <p class="countdown">@((Model.WeddingDate - DateTime.Today).Days) days to go!</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="row mt-4">
+        <!-- Budget Summary Card -->
+        <div class="col-md-4">
+            <div class="card">
+                <div class="card-header bg-primary text-white">
+                    <h5 class="mb-0">Budget Overview</h5>
+                </div>
+                <div class="card-body">
+                    <div class="progress mb-3">
+                        <div class="progress-bar" role="progressbar"
+                             style="width: @(Model.Budgets.AllocatedAmount > 0 ? (Model.Budgets.SpentAmount / Model.Budgets.AllocatedAmount) * 100 : 0)%"
+                             aria-valuenow="@Model.Budgets.SpentAmount" aria-valuemin="0" aria-valuemax="@Model.Budgets.AllocatedAmount">
+                        </div>
+                    </div>
+                    <div class="d-flex justify-content-between">
+                        <span>Total Budget:</span>
+                        <span>$@Model.Budgets.AllocatedAmount.ToString("#,##0.00")</span>
+                    </div>
+                    <div class="d-flex justify-content-between">
+                        <span>Spent:</span>
+                        <span>$@Model.Budgets.SpentAmount.ToString("#,##0.00")</span>
+                    </div>
+                    <div class="d-flex justify-content-between font-weight-bold">
+                        <span>Remaining:</span>
+                        <span>$@((Model.Budgets.AllocatedAmount - Model.Budgets.SpentAmount).ToString("#,##0.00"))</span>
+                    </div>
+                    <button type="button" class="btn btn-sm btn-outline-primary mt-3" data-bs-toggle="modal" data-bs-target="#budgetModal">
+                        Manage Budget
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Upcoming Dates Card -->
+        <div class="col-md-4">
+            <div class="card">
+                <div class="card-header bg-info text-white">
+                    <h5 class="mb-0">Upcoming Dates</h5>
+                </div>
+                <div class="card-body">
+                    <ul class="list-group">
+                        @foreach (var checklist in Model.Checklists.OrderBy(d => d.DueDate).Take(5))
+                        {
+                            <li class="list-group-item d-flex justify-content-between align-items-center">
+                                <div>
+                                    <strong>@checklist.TaskName</strong>
+                                    <br />
+                                    <small>@checklist.DueDate.ToString("MMM d, yyyy")</small>
+                                </div>
+                                <span class="badge @(checklist.IsCompleted ? "bg-success" : (checklist.DueDate < DateTime.Today ? "bg-danger" : "bg-primary")) rounded-pill">
+                                    @((checklist.DueDate - DateTime.Today).Days) days
+                                </span>
+                            </li>
+                        }
+                    </ul>
+                    <button type="button" class="btn btn-sm btn-outline-info mt-3" data-bs-toggle="modal" data-bs-target="#datesModal">
+                        View All Dates
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Tasks Progress Card -->
+        <div class="col-md-4">
+
+            <div class="card">
+                <div class="card-header bg-success text-white">
+                    <h5 class="mb-0">Planning Progress</h5>
+                </div>
+                <div class="card-body">
+                    @{
+                        var totalTasks = Model.Checklists.Count(c => !c.IsDeleted);
+                        var completedTasks = Model.Checklists.Count(c => c.IsCompleted && !c.IsDeleted);
+                        var progressPercentage = totalTasks > 0 ? (completedTasks * 100) / totalTasks : 0;
+                    }
+
+                    <div class="progress mb-3">
+                        <div class="progress-bar bg-success" role="progressbar"
+                             style="width: @progressPercentage%"
+                             aria-valuenow="@progressPercentage" aria-valuemin="0" aria-valuemax="100">
+                            @progressPercentage%
+                        </div>
+                    </div>
+
+                    <div class="d-flex justify-content-between">
+                        <span>Completed Tasks:</span>
+                        <span>@completedTasks / @totalTasks</span>
+                    </div>
+
+                    <button type="button" class="btn btn-sm btn-outline-success mt-3" data-bs-toggle="modal" data-bs-target="#tasksModal">
+                        Manage Tasks
+                    </button>
+                </div>
+            </div>
+
+        </div>
+    </div>
+
+    <div class="row mt-4">
+        <!-- To-Do Lists -->
+        <div class="col-md-8">
+            <div class="card">
+                <div class="card-header bg-dark text-white">
+                    <h5 class="mb-0">To-Do Lists</h5>
+                </div>
+                <div class="card-body">
+                    <ul class="nav nav-tabs" id="taskTabs" role="tablist">
+                        @*
+                        @foreach (var category in Model.TodoCategories.Select((cat, i) => new { cat, i }))
+                        {
+                            <li class="nav-item" role="presentation">
+                                <button class="nav-link @(category.i == 0 ? "active" : "")"
+                                        id="@category.cat.Name-tab"
+                                        data-bs-toggle="tab"
+                                        data-bs-target="#@category.cat.Name"
+                                        type="button"
+                                        role="tab"
+                                        aria-controls="@category.cat.Name"
+                                        aria-selected="@(category.i == 0 ? "true" : "false")">
+                                    @category.cat.Name
+                                </button>
+                            </li>
+                        }*@
+                    </ul>
+                    <div class="tab-content p-3" id="taskTabsContent">
+                    @*
+
+                        @foreach (var category in Model.TodoCategories.Select((cat, i) => new { cat, i }))
+                        {
+                            <div class="tab-pane fade @(category.i == 0 ? "show active" : "")"
+                                 id="@category.cat.Name"
+                                 role="tabpanel"
+                                 aria-labelledby="@category.cat.Name-tab">
+
+                                <div class="mb-3">
+                                    <form asp-action="AddTodo" method="post" class="row g-3">
+                                        <input type="hidden" name="TodoCategoryId" value="@category.cat.Id" />
+                                        <div class="col-md-5">
+                                            <input type="text" class="form-control" name="Description" placeholder="New task" required />
+                                        </div>
+                                        <div class="col-md-3">
+                                            <input type="date" class="form-control" name="DueDate" required />
+                                        </div>
+                                        <div class="col-md-2">
+                                            <input type="text" class="form-control" name="AssignedTo" placeholder="Assigned to" />
+                                        </div>
+                                        <div class="col-md-2">
+                                            <button type="submit" class="btn btn-primary w-100">Add</button>
+                                        </div>
+                                    </form>
+                                </div>
+
+                                <ul class="list-group">
+                                    @foreach (var task in category.cat.Items.OrderBy(t => t.DueDate))
+                                    {
+                                        <li class="list-group-item d-flex justify-content-between align-items-center @(task.IsCompleted ? "list-group-item-success" : (task.DueDate < DateTime.Today ? "list-group-item-danger" : ""))">
+                                            <div class="d-flex align-items-center">
+                                                <form asp-action="CompleteTodo" method="post" class="me-2">
+                                                    <input type="hidden" name="id" value="@task.Id" />
+                                                    <input type="checkbox" class="form-check-input"
+                                                    @(task.IsCompleted ? "checked" : "")
+                                                           onChange="this.form.submit()" />
+                                                </form>
+                                                <div>
+                                                    <span class="@(task.IsCompleted ? "text-decoration-line-through" : "")">@task.Description</span>
+                                                    @if (!string.IsNullOrEmpty(task.AssignedTo))
+                                                    {
+                                                        <span class="badge bg-secondary ms-2">@task.AssignedTo</span>
+                                                    }
+                                                </div>
+                                            </div>
+                                            <span class="badge @(task.DueDate < DateTime.Today ? "bg-danger" : "bg-primary") rounded-pill">
+                                                @task.DueDate.ToString("MMM d")
+                                            </span>
+                                        </li>
+                                    }
+                                </ul>
+                            </div>
+                        }*@
+                    </div>
+
+
+                </div>
+            </div>
+        </div>
+
+        <!-- Budget Details -->
+        <div class="col-md-4">
+            <div class="card">
+                <div class="card-header bg-warning text-dark">
+                    <h5 class="mb-0">Budget Details</h5>
+                </div>
+                <div class="card-body">
+                    <div class="table-responsive">
+                        <table class="table table-sm">
+                            <thead>
+                                <tr>
+                                    <th>Category</th>
+                                    <th>Estimated</th>
+                                    <th>Actual</th>
+                                    <th>Status</th>
+                                </tr>
+                            </thead>
+                            @*
+                            <tbody>
+                                @foreach (var category in Model.BudgetItems
+                                .GroupBy(b => b.Category)
+                                .Select(g => new
+                                {
+                                   Category = g.Key,
+                                   Estimated = g.Sum(b => b.EstimatedCost),
+                                   Actual = g.Sum(b => b.ActualCost),
+                                   PaidItems = g.Count(b => b.IsPaid),
+                                   TotalItems = g.Count()
+                                }))
+                                {
+                                    <tr>
+                                        <td>@category.Category</td>
+                                        <td>$@category.Estimated.ToString("#,##0")</td>
+                                        <td>$@category.Actual.ToString("#,##0")</td>
+                                        <td>
+                                            <div class="progress" style="height: 5px;">
+                                                <div class="progress-bar @(category.Actual > category.Estimated ? "bg-danger" : "bg-success")"
+                                                     role="progressbar"
+                                                     style="width: @(category.Estimated > 0 ? Math.Min(100, (category.Actual / category.Estimated) * 100) : 0)%"
+                                                     aria-valuenow="@category.Actual"
+                                                     aria-valuemin="0"
+                                                     aria-valuemax="@category.Estimated">
+                                                </div>
+                                            </div>
+                                            <small>@category.PaidItems of @category.TotalItems paid</small>
+                                        </td>
+                                    </tr>
+                                }
+                            </tbody>
+                            *@
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@* Modals *@
+@* Tasks Modal *@
+<div class="modal fade" id="tasksModal" tabindex="-1" aria-labelledby="tasksModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="tasksModalLabel">Manage Tasks</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <!-- Tabs for each category -->
+                <ul class="nav nav-pills mb-3" id="modalTaskTabs" role="tablist">
+                @*
+                    @foreach (var category in Model.TodoCategories.Select((cat, i) => new { cat, i }))
+                    {
+                        <li class="nav-item" role="presentation">
+                            <button class="nav-link @(category.i == 0 ? "active" : "")"
+                                    id="modal-@category.cat.Name-tab"
+                                    data-bs-toggle="tab"
+                                    data-bs-target="#modal-@category.cat.Name"
+                                    type="button"
+                                    role="tab"
+                                    aria-controls="modal-@category.cat.Name"
+                                    aria-selected="@(category.i == 0 ? "true" : "false")">
+                                @category.cat.Name
+                            </button>
+                        </li>
+                    }
+                *@
+                </ul>
+                <div class="tab-content" id="modalTaskTabsContent">
+                @*
+                    @foreach (var category in Model.TodoCategories.Select((cat, i) => new { cat, i }))
+                    {
+                        <div class="tab-pane fade @(category.i == 0 ? "show active" : "")"
+                             id="modal-@category.cat.Name"
+                             role="tabpanel"
+                             aria-labelledby="modal-@category.cat.Name-tab">
+
+                            <div class="mb-3">
+                                <form asp-action="AddTodo" method="post" class="row g-3">
+                                    <input type="hidden" name="TodoCategoryId" value="@category.cat.Id" />
+                                    <div class="col-md-5">
+                                        <input type="text" class="form-control" name="Description" placeholder="New task" required />
+                                    </div>
+                                    <div class="col-md-3">
+                                        <input type="date" class="form-control" name="DueDate" required />
+                                    </div>
+                                    <div class="col-md-2">
+                                        <input type="text" class="form-control" name="AssignedTo" placeholder="Assigned to" />
+                                    </div>
+                                    <div class="col-md-2">
+                                        <button type="submit" class="btn btn-primary w-100">Add</button>
+                                    </div>
+                                </form>
+                            </div>
+
+                            <table class="table">
+                                <thead>
+                                    <tr>
+                                        <th>Task</th>
+                                        <th>Due Date</th>
+                                        <th>Assigned To</th>
+                                        <th>Status</th>
+                                        <th>Actions</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    @foreach (var task in category.cat.Items.OrderBy(t => t.DueDate))
+                                    {
+                                        <tr class="@(task.IsCompleted ? "table-success" : (task.DueDate < DateTime.Today ? "table-danger" : ""))">
+                                            <td>@task.Description</td>
+                                            <td>@task.DueDate.ToString("MMM d, yyyy")</td>
+                                            <td>@(string.IsNullOrEmpty(task.AssignedTo) ? "-" : task.AssignedTo)</td>
+                                            <td>@(task.IsCompleted ? "Complete" : "Pending")</td>
+                                            <td>
+                                                <form asp-action="CompleteTodo" method="post" class="d-inline">
+                                                    <input type="hidden" name="id" value="@task.Id" />
+                                                    <button type="submit" class="btn btn-sm btn-success">Complete</button>
+                                                </form>
+                                                <!-- Add edit/delete buttons as needed -->
+                                            </td>
+                                        </tr>
+                                    }
+                                </tbody>
+                            </table>
+                        </div>
+                    }
+                *@
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+@* Budget Modal *@
+<div class="modal fade" id="budgetModal" tabindex="-1" aria-labelledby="budgetModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="budgetModalLabel">Manage Budget</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <div class="mb-3">
+                    <form asp-action="UpdateTotalBudget" method="post" class="row g-3 mb-4">
+                        <input type="hidden" name="dashboardId" value="@Model.Id" />
+                        <div class="col-md-8">
+                            <label class="form-label">Total Wedding Budget</label>
+                            <input type="number" class="form-control" name="totalBudget" value="@Model.Budgets.AllocatedAmount" min="0" step="0.01" />
+                        </div>
+                        <div class="col-md-4 d-flex align-items-end">
+                            <button type="submit" class="btn btn-primary">Update Total Budget</button>
+                        </div>
+                    </form>
+
+                    <hr />
+
+                    <form asp-action="AddBudgetItem" method="post" class="row g-3">
+                        <input type="hidden" name="WeddingDashboardId" value="@Model.Id" />
+                        <div class="col-md-3">
+                            <input type="text" class="form-control" name="Category" placeholder="Category" required />
+                        </div>
+                        <div class="col-md-3">
+                            <input type="text" class="form-control" name="Description" placeholder="Description" required />
+                        </div>
+                        <div class="col-md-2">
+                            <input type="number" class="form-control" name="EstimatedCost" placeholder="Est. Cost" required />
+                        </div>
+                        <div class="col-md-2">
+                            <input type="number" class="form-control" name="ActualCost" placeholder="Actual Cost" value="0" />
+                        </div>
+                        <div class="col-md-2">
+                            <button type="submit" class="btn btn-primary w-100">Add</button>
+                        </div>
+                    </form>
+                </div>
+
+                <table class="table">
+                    <thead>
+                        <tr>
+                            <th>Category</th>
+                            <th>Description</th>
+                            <th>Est. Cost</th>
+                            <th>Actual Cost</th>
+                            <th>Status</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                    @*
+                        @foreach (var item in Model.BudgetItems.OrderBy(b => b.Category))
+                        {
+                            <tr>
+                                <td>@item.Category</td>
+                                <td>@item.Description</td>
+                                <td>$@item.EstimatedCost.ToString("#,##0.00")</td>
+                                <td>$@item.ActualCost.ToString("#,##0.00")</td>
+                                <td>
+                                    <span class="badge @(item.IsPaid ? "bg-success" : "bg-warning")">
+                                        @(item.IsPaid ? "Paid" : "Unpaid")
+                                    </span>
+                                </td>
+                                <td>
+                                    <button type="button" class="btn btn-sm btn-primary" data-bs-toggle="modal" data-bs-target="#editBudgetItem@(item.Id)">
+                                        Edit
+                                    </button>
+                                </td>
+                            </tr>
+                        }
+                    *@
+                    </tbody>
+                </table>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+@* Dates Modal *@
+<div class="modal fade" id="datesModal" tabindex="-1" aria-labelledby="datesModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="datesModalLabel">Important Dates</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <div class="mb-3">
+                    <form asp-action="AddImportantDate" method="post" class="row g-3">
+                        <input type="hidden" name="WeddingDashboardId" value="@Model.Id" />
+                        <div class="col-md-4">
+                            <input type="text" class="form-control" name="Title" placeholder="Title" required />
+                        </div>
+                        <div class="col-md-4">
+                            <input type="text" class="form-control" name="Description" placeholder="Description" />
+                        </div>
+                        <div class="col-md-2">
+                            <input type="date" class="form-control" name="Date" required />
+                        </div>
+                        <div class="col-md-2">
+                            <button type="submit" class="btn btn-primary w-100">Add</button>
+                        </div>
+                    </form>
+                </div>
+
+                <table class="table">
+                    <thead>
+                        <tr>
+                            <th>Date</th>
+                            <th>Title</th>
+                            <th>Description</th>
+                            <th>Status</th>
+                            <th>Days Left</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach (var date in Model.Checklists.OrderBy(d => d.DueDate))
+                        {
+                            <tr class="@(date.IsCompleted ? "table-success" : (date.DueDate < DateTime.Today ? "table-danger" : ""))">
+                                <td>@date.DueDate.ToString("MMM d, yyyy")</td>
+                                <td>@date.TaskName</td>
+                                <td>@date.TaskDescription</td>
+                                <td>@(date.IsCompleted ? "Complete" : "Pending")</td>
+                                <td>@((date.DueDate - DateTime.Today).Days) days</td>
+                                <td>
+                                    <form asp-action="CompleteImportantDate" method="post" class="d-inline">
+                                        <input type="hidden" name="id" value="@date.Id" />
+                                        <button type="submit" class="btn btn-sm btn-success">Mark Complete</button>
+                                    </form>
+                                </td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+@* Edit Budget Item Modals (one for each item) 
+@foreach (var item in Model.BudgetItems)
+{
+    <div class="modal fade" id="editBudgetItem@(item.Id)" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">Edit Budget Item</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <form asp-action="UpdateBudgetItem" method="post">
+                        <input type="hidden" name="Id" value="@item.Id" />
+                        <input type="hidden" name="WeddingDashboardId" value="@Model.Id" />
+
+                        <div class="mb-3">
+                            <label class="form-label">Category</label>
+                            <input type="text" class="form-control" name="Category" value="@item.Category" required />
+                        </div>
+
+                        <div class="mb-3">
+                            <label class="form-label">Description</label>
+                            <input type="text" class="form-control" name="Description" value="@item.Description" required />
+                        </div>
+
+                        <div class="mb-3">
+                            <label class="form-label">Estimated Cost</label>
+                            <input type="number" class="form-control" name="EstimatedCost" value="@item.EstimatedCost" required />
+                        </div>
+
+                        <div class="mb-3">
+                            <label class="form-label">Actual Cost</label>
+                            <input type="number" class="form-control" name="ActualCost" value="@item.ActualCost" />
+                        </div>
+
+                        <div class="mb-3 form-check">
+                            <input type="checkbox" class="form-check-input" id="isPaid@(item.Id)" name="IsPaid" @(item.IsPaid ? "checked" : "") />
+                            <label class="form-check-label" for="isPaid@(item.Id)">Paid</label>
+                        </div>
+
+                        <div class="mb-3">
+                            <label class="form-label">Payment Date</label>
+                            <input type="date" class="form-control" name="PaymentDate" value="@(item.PaymentDate?.ToString("yyyy-MM-dd"))" />
+                        </div>
+
+                        <div class="text-end">
+                            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                            <button type="submit" class="btn btn-primary">Save Changes</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>*@
+}

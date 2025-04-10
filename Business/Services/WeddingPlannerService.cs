@@ -166,6 +166,27 @@ namespace wedding_planer_ad.Business.Services
                 .ToListAsync();
         }
 
+        public async Task<IEnumerable<BookingVendorDTO>> GetBookingByCoupleIdWithVendor(int coupleId)
+        {
+            // Fetch bookings along with the related vendor details
+            var bookings = await _context.Booking
+                .Where(b => b.CoupleId == coupleId && !b.IsDeleted)
+                .Include(b => b.Vendor)  // Include Vendor details
+                .ToListAsync();
+
+            // Map the bookings to BookingVendorDTO with vendor details
+            var bookingVendorDTOs = bookings.Select(booking => new BookingVendorDTO
+            {
+                VendorName = booking.Vendor.Name,
+                VendorDescription = booking.Vendor.Description,
+                VendorPricing = booking.Vendor.Pricing,
+                BookingDate = booking.BookingDate,
+                ServiceDetails = booking.ServiceDetails
+            }).ToList();
+
+            return bookingVendorDTOs;
+        }
+
         public async Task<WeddingTimeline> GetTimelineByIdAsync(int id)
         {
             return await _context.WeddingTimeline.FirstOrDefaultAsync(t => t.Id == id);
@@ -204,7 +225,35 @@ namespace wedding_planer_ad.Business.Services
         }
 
 
+        public async Task<WeddingChecklist> GetChecklistByIdAsync(int id)
+        {
+            return await _context.WeddingChecklist.FindAsync(id);
+        }
 
+        public async Task UpdateChecklistAsync(WeddingChecklist checklist)
+        {
+            _context.WeddingChecklist.Update(checklist);
+            await _context.SaveChangesAsync();
+        }
+
+        public async Task DeleteChecklistAsync(int id)
+        {
+            var item = await _context.WeddingChecklist.FindAsync(id);
+            if (item != null)
+            {
+                _context.WeddingChecklist.Remove(item);
+                await _context.SaveChangesAsync();
+            }
+        }
+
+        public async Task AddChecklistTaskAsync(WeddingChecklist checklist)
+        {
+            checklist.AssignedTo = string.Empty;
+            checklist.IsDeleted = false;
+
+            _context.WeddingChecklist.Add(checklist);
+            await _context.SaveChangesAsync();
+        }
 
 
 

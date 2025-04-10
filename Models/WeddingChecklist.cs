@@ -8,7 +8,7 @@
         public string TaskDescription { get; set; }
         public string TaskStatus { get; set; }
         public DateTime DueDate { get; set; }
-        public string AssignedTo { get; set; }
+        public string AssignedTo { get; set; } = string.Empty;
         public bool IsDeleted { get; set; }
     }
 }

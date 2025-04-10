@@ -5,6 +5,8 @@ using wedding_planer_ad.Models;
 using wedding_planer_ad.Exceptions;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
+using wedding_planer_ad.Models.DTO;
+
 
 namespace wedding_planer_ad.Controllers
 {
@@ -128,6 +130,7 @@ namespace wedding_planer_ad.Controllers
 
         public async Task<IActionResult> ViewChecklists(int coupleId)
         {
+            ViewBag.CoupleId = coupleId;
             var checklists = await _plannerService.GetChecklistsByCoupleIdAsync(coupleId);
             return View(checklists);
         }
@@ -153,8 +156,11 @@ namespace wedding_planer_ad.Controllers
 
         public async Task<IActionResult> ViewWeddingBooking(int coupleId)
         {
-            var guests = await _plannerService.GetBookingByCoupleId(coupleId);
-            return View(guests);
+            ViewBag.CoupleId = coupleId;
+
+            var bookingVendorDTOs = await _plannerService.GetBookingByCoupleIdWithVendor(coupleId);
+
+            return View(bookingVendorDTOs);
         }
 
         public async Task<IActionResult> TimelineDetails(int id)
@@ -237,6 +243,82 @@ namespace wedding_planer_ad.Controllers
             }
         }
 
+        public async Task<IActionResult> ChecklistDetails(int id)
+        {
+            var item = await _plannerService.GetChecklistByIdAsync(id);
+            if (item == null)
+            {
+                return NotFound();
+            }
+
+            ViewBag.TaskStatusOptions = Enum.GetNames(typeof(Models.TaskStatus));
+            return View(item);
+        }
+
+        // POST: Update Checklist Item
+        [HttpPost]
+        public async Task<IActionResult> UpdateChecklist(WeddingChecklist checklist)
+        {
+            await _plannerService.UpdateChecklistAsync(checklist);
+            return RedirectToAction("ViewChecklists", new { coupleId = checklist.CoupleId });
+        }
+
+        // POST: Delete Checklist Item
+        [HttpPost]
+        public async Task<IActionResult> DeleteChecklist(int id)
+        {
+            var item = await _plannerService.GetChecklistByIdAsync(id);
+            if (item == null)
+            {
+                return NotFound();
+            }
+
+            int coupleId = item.CoupleId;
+            await _plannerService.DeleteChecklistAsync(id);
+            return RedirectToAction("ViewChecklists", new { coupleId = coupleId });
+        }
+
+        [HttpPost]
+        public async Task<IActionResult> SaveChecklistChanges(WeddingChecklist checklist, string delete)
+        {
+            if (!string.IsNullOrEmpty(delete) && delete == "true")
+            {
+                await _plannerService.DeleteChecklistAsync(checklist.Id);
+            }
+            else
+            {
+                await _plannerService.UpdateChecklistAsync(checklist);
+            }
+
+            return RedirectToAction("ViewChecklists", new { coupleId = checklist.CoupleId });
+        }
+
+        [HttpGet]
+        public IActionResult AddChecklist(int coupleId)
+        {
+            Console.WriteLine("----------------------------");
+            Console.WriteLine(coupleId);
+            return View(new WeddingChecklist { CoupleId = coupleId });
+        }
+
+        [HttpPost]
+        public async Task<IActionResult> AddChecklist(WeddingChecklist checklist)
+        {
+            checklist.AssignedTo = "";
+            if (ModelState.IsValid)
+            {
+                await _plannerService.AddChecklistTaskAsync(checklist);
+                return RedirectToAction("ViewChecklists", new { coupleId = checklist.CoupleId });
+            }
+            foreach (var modelState in ModelState)
+            {
+                foreach (var error in modelState.Value.Errors)
+                {
+                    Console.WriteLine($"Error in {modelState.Key}: {error.ErrorMessage}");
+                }
+            }
+            return View(checklist);
+        }
 
 
 

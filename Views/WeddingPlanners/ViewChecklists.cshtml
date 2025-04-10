@@ -7,6 +7,9 @@
 
 <h2>Wedding Checklist</h2>
 
+<a asp-action="AddChecklist" asp-route-coupleId="@ViewBag.CoupleId" class="btn btn-primary mb-3">+ Add New Task</a>
+
+
 @if (!Model.Any())
 {
     <div class="alert alert-info">No checkist found for wedding.</div>
@@ -25,11 +28,11 @@ else
         <tbody>
             @foreach (var member in Model)
             {
-                <tr>
+                <tr onclick="location.href='@Url.Action("ChecklistDetails", "WeddingPlanners", new { id = member.Id })'" style="cursor:pointer;">
                     <td>@member.TaskName</td>
                     <td>@member.TaskDescription</td>
                     <td>@member.TaskStatus</td>
-                    <td>@member.DueDate</td>
+                    <td>@member.DueDate.ToShortDateString()</td>
                 </tr>
             }
         </tbody>

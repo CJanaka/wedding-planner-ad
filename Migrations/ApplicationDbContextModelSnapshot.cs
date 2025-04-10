@@ -1068,7 +1068,7 @@ namespace wedding_planer_ad.Migrations
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
-                    b.HasOne("wedding_planer_ad.Models.Vendor", null)
+                    b.HasOne("wedding_planer_ad.Models.Vendor", "Vendor")
                         .WithMany("Bookings")
                         .HasForeignKey("VendorId")
                         .OnDelete(DeleteBehavior.Cascade)
@@ -1081,6 +1081,8 @@ namespace wedding_planer_ad.Migrations
                     b.HasOne("wedding_planer_ad.Models.Venue", null)
                         .WithMany("Bookings")
                         .HasForeignKey("VenueId");
+
+                    b.Navigation("Vendor");
                 });
 
             modelBuilder.Entity("wedding_planer_ad.Models.CoupleMember", b =>

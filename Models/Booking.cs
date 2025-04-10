@@ -13,6 +13,7 @@
         public string PaymentStatus { get; set; }
         public bool IsDeleted { get; set; }
         public ICollection<Payment> Payments { get; set; }
+        public Vendor Vendor { get; set; } // new
         public ICollection<Review> Reviews { get; set; }
     }
 }

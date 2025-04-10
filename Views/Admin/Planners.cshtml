@@ -1,0 +1,30 @@
+﻿@model List<wedding_planer_ad.Models.ApplicationUser>
+
+@{
+    Layout = "~/Views/Admin/_AdminLayout.cshtml";
+    ViewData["Title"] = "Wedding planner Dashboard";
+}
+
+<h2>Wedding Planners</h2>
+
+<table class="table table-bordered table-striped">
+    <thead>
+        <tr>
+            <th>Email</th>
+            <th>First Name</th>
+            <th>Last Name</th>
+            <th>Phone Number</th>
+        </tr>
+    </thead>
+    <tbody>
+        @foreach (var planner in Model)
+        {
+            <tr>
+                <td>@planner.Email</td>
+                <td>@planner.FirstName</td>
+                <td>@planner.LastName</td>
+                <td>@planner.PhoneNumber</td>
+            </tr>
+        }
+    </tbody>
+</table>

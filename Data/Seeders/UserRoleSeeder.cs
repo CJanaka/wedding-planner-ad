@@ -8,7 +8,7 @@ namespace wedding_planer_ad.Data.Seeders
         public static async Task SeedRoles(IServiceProvider serviceProvider)
         {
             var roleManager = serviceProvider.GetRequiredService<RoleManager<IdentityRole>>();
-            string[] roles = { "Admin", "Planner", "Couple" };
+            string[] roles = { "Admin", "Planner", "Couple" , "Vendor" };
 
             foreach (var role in roles)
             {
@@ -25,7 +25,7 @@ namespace wedding_planer_ad.Data.Seeders
             var userManager = serviceProvider.GetRequiredService<UserManager<ApplicationUser>>();
             var roleManager = serviceProvider.GetRequiredService<RoleManager<IdentityRole>>();
 
-            string[] roles = { "Admin", "Planner", "Couple" };
+            string[] roles = { "Admin", "Planner", "Couple" , "Vendor"};
             foreach (var role in roles)
             {
                 if (!await roleManager.RoleExistsAsync(role))
@@ -38,6 +38,7 @@ namespace wedding_planer_ad.Data.Seeders
             ("admin@mail.com", "Admin", "Admin","user"),
             ("planner@mail.com", "Planner", "Planner","user"),
             ("couple@mail.com", "Couple", "Couple","one"),
+            ("vendor@mail.com", "Vendor", "Vendor","user"),
 
         };
 

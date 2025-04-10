@@ -1,0 +1,30 @@
+﻿@model IEnumerable<wedding_planer_ad.Models.ApplicationUser>
+
+@{
+    Layout = "~/Views/Admin/_AdminLayout.cshtml";
+    ViewData["Title"] = "Wedding planner Dashboard";
+}
+
+<h2>Couples</h2>
+
+<table class="table table-striped">
+    <thead>
+        <tr>
+            <th>Email</th>
+            <th>First Name</th>
+            <th>Last Name</th>
+            <th>Phone</th>
+        </tr>
+    </thead>
+    <tbody>
+        @foreach (var couple in Model)
+        {
+            <tr>
+                <td>@couple.Email</td>
+                <td>@couple.FirstName</td>
+                <td>@couple.LastName</td>
+                <td>@couple.PhoneNumber</td>
+            </tr>
+        }
+    </tbody>
+</table>

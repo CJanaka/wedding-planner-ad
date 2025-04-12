@@ -7,6 +7,10 @@
 
 <h2>Wedding Planners</h2>
 
+<a class="btn btn-success mb-3" asp-action="AddPlanner" asp-controller="Admin">
+    <i class="fas fa-plus"></i> + Add New Planner
+</a>
+
 <table class="table table-bordered table-striped">
     <thead>
         <tr>
@@ -19,7 +23,7 @@
     <tbody>
         @foreach (var planner in Model)
         {
-            <tr>
+            <tr onclick="window.location.href='@Url.Action("PlannerDetails", "Admin", new { id = planner.Id })'" style="cursor:pointer;">
                 <td>@planner.Email</td>
                 <td>@planner.FirstName</td>
                 <td>@planner.LastName</td>

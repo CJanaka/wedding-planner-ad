@@ -7,6 +7,10 @@
 
 <h2>Vendors</h2>
 
+<a class="btn btn-success mb-3" asp-action="AddVendor" asp-controller="Admin">
+    <i class="fas fa-plus"></i> + Add New Vendor
+</a>
+
 <table class="table table-striped">
     <thead>
         <tr>
@@ -19,7 +23,7 @@
     <tbody>
         @foreach (var vendor in Model)
         {
-            <tr>
+            <tr onclick="window.location.href='@Url.Action("VendorDetails", "Admin", new { id = vendor.Id })'" style="cursor:pointer;">
                 <td>@vendor.Email</td>
                 <td>@vendor.FirstName</td>
                 <td>@vendor.LastName</td>

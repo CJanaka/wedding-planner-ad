@@ -8,6 +8,7 @@ using wedding_planer_ad.Data;
 using wedding_planer_ad.Exceptions;
 using wedding_planer_ad.Models;
 using wedding_planer_ad.Models.DTO;
+using wedding_planer_ad.Models.ViewModels;
 
 namespace wedding_planer_ad.Business.Services
 {
@@ -254,6 +255,51 @@ namespace wedding_planer_ad.Business.Services
             _context.WeddingChecklist.Add(checklist);
             await _context.SaveChangesAsync();
         }
+
+        public async Task<WeddingPlannerDashboardViewModel> GetDashboardDataAsync(string plannerUserId)
+        {
+            // Get all couples linked to this wedding planner
+            var couples = await _context.Couple
+                .Where(c => c.Planners.PlannerUserId == plannerUserId && !c.IsDeleted)
+                .ToListAsync();
+
+            // Total Weddings
+            var totalWeddings = couples.Count;
+
+            // Completed Weddings
+            var completedWeddings = couples.Count(c => c.WeddingDate < DateTime.Now);
+
+            // Upcoming Weddings
+            var upcomingWeddings = couples.Count(c => c.WeddingDate > DateTime.Now);
+
+            // Total Budget (sum of all couple budgets)
+            var totalBudget = couples.Sum(c => c.Budget);
+
+            // Weddings per month (for chart)
+            var completedWeddingsPerMonth = couples
+                .Where(c => c.WeddingDate < DateTime.Now)
+                .GroupBy(c => c.WeddingDate.Month)
+                .Select(g => g.Count())
+                .ToList();
+
+            var upcomingWeddingsPerMonth = couples
+                .Where(c => c.WeddingDate > DateTime.Now)
+                .GroupBy(c => c.WeddingDate.Month)
+                .Select(g => g.Count())
+                .ToList();
+
+            return new WeddingPlannerDashboardViewModel
+            {
+                TotalWeddings = totalWeddings,
+                CompletedWeddings = completedWeddings,
+                UpcomingWeddings = upcomingWeddings,
+                TotalBudget = totalBudget,
+                CompletedWeddingsPerMonth = completedWeddingsPerMonth,
+                UpcomingWeddingsPerMonth = upcomingWeddingsPerMonth
+            };
+        }
+
+
 
 
 

@@ -25,8 +25,9 @@ namespace wedding_planer_ad.Controllers
 
         public async Task<IActionResult> Index()
         {
-            var planners = await _plannerService.GetAllAsync();
-            return View(planners);
+            var plannerUserId = _userManager.GetUserId(User);
+            var dashboardData = await _plannerService.GetDashboardDataAsync(plannerUserId);
+            return View(dashboardData);
         }
 
         public async Task<IActionResult> Details(int? id)
@@ -320,7 +321,6 @@ namespace wedding_planer_ad.Controllers
             return View(checklist);
         }
 
-
-
     }
+
 }

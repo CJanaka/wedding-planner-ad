@@ -10,6 +10,9 @@
         // For chart
         public List<int> CompletedWeddingsPerMonth { get; set; }
         public List<int> UpcomingWeddingsPerMonth { get; set; }
+
+        public Dictionary<string, int> WeddingsPerMonth { get; set; }
+
     }
 
 

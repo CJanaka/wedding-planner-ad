@@ -26,9 +26,11 @@ namespace wedding_planer_ad.Controllers
         public async Task<IActionResult> Index()
         {
             var plannerUserId = _userManager.GetUserId(User);
-            var dashboardData = await _plannerService.GetDashboardDataAsync(plannerUserId);
-            return View(dashboardData);
+            var dashboard = await _plannerService.GetDashboardDataAsync(plannerUserId);
+            dashboard.WeddingsPerMonth = await _plannerService.GetWeddingsPerMonthAsync(plannerUserId);
+            return View(dashboard);
         }
+
 
         public async Task<IActionResult> Details(int? id)
         {

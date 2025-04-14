@@ -1,6 +1,7 @@
 ﻿using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using System.Collections.Generic;
+using System.Globalization;
 using System.Linq;
 using System.Threading.Tasks;
 using wedding_planer_ad.Business.Interfaces;
@@ -255,6 +256,38 @@ namespace wedding_planer_ad.Business.Services
             _context.WeddingChecklist.Add(checklist);
             await _context.SaveChangesAsync();
         }
+
+        public async Task<Dictionary<string, int>> GetWeddingsPerMonthAsync(string plannerUserId)
+        {
+            var weddings = await _context.weddingPlanner
+                .Include(wp => wp.Couple)
+                .Where(wp => wp.PlannerUserId == plannerUserId && !wp.IsDeleted)
+                .ToListAsync();
+
+            var grouped = weddings
+                .GroupBy(w => w.Couple.WeddingDate.Month) // Group by month
+                .OrderBy(g => g.Key) // Sort by month
+                .ToDictionary(
+                    g => CultureInfo.CurrentCulture.DateTimeFormat.GetAbbreviatedMonthName(g.Key), // Get abbreviated month name
+                    g => g.Count() // Get count of weddings for that month
+                );
+
+            // To ensure all months are shown, even those without weddings, initialize them with 0 count
+            var allMonths = CultureInfo.CurrentCulture.DateTimeFormat.AbbreviatedMonthNames.Take(12).ToList();
+
+            foreach (var month in allMonths)
+            {
+                if (!grouped.ContainsKey(month))
+                {
+                    grouped.Add(month, 0); // Add missing months with 0 count
+                }
+            }
+
+            // Return the dictionary sorted by month
+            return grouped.OrderBy(g => Array.IndexOf(allMonths.ToArray(), g.Key)).ToDictionary(g => g.Key, g => g.Value);
+        }
+
+
 
         public async Task<WeddingPlannerDashboardViewModel> GetDashboardDataAsync(string plannerUserId)
         {

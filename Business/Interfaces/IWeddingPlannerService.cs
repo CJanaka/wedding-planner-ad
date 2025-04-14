@@ -47,6 +47,9 @@ namespace wedding_planer_ad.Business.Interfaces
 
         Task<WeddingPlannerDashboardViewModel> GetDashboardDataAsync(string plannerUserId);
 
+        Task<Dictionary<string, int>> GetWeddingsPerMonthAsync(string plannerUserId);
+
+
 
 
     }

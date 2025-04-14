@@ -16,6 +16,7 @@ builder.Services.AddDbContext<ApplicationDbContext>(options =>
     options.UseMySql(connectionString, ServerVersion.AutoDetect(connectionString)));
 
 builder.Services.AddScoped<IWeddingPlannerService, WeddingPlannerService>();
+builder.Services.AddScoped<IUserService, UserService>();
 
 builder.Services.AddIdentity<ApplicationUser, IdentityRole>(options =>
 {

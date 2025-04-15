@@ -332,6 +332,31 @@ namespace wedding_planer_ad.Business.Services
             };
         }
 
+        public async Task<AdminDashboardViewModel> GetAdminDashboardDataAsync()
+        {
+            var couples = await _context.Couple
+                .Where(c => !c.IsDeleted)
+                .ToListAsync();
+
+            int total = couples.Count;
+            int completed = couples.Count(c => c.WeddingDate < DateTime.Now);
+
+            var weddingsPerMonth = couples
+                .GroupBy(c => c.WeddingDate.Month)
+                .OrderBy(g => g.Key)
+                .ToDictionary(
+                    g => CultureInfo.CurrentCulture.DateTimeFormat.GetAbbreviatedMonthName(g.Key),
+                    g => g.Count()
+                );
+
+            return new AdminDashboardViewModel
+            {
+                TotalWeddings = total,
+                CompletedWeddings = completed,
+                WeddingsPerMonth = weddingsPerMonth
+            };
+        }
+
 
 
 

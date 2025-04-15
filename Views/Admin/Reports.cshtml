@@ -1,0 +1,75 @@
+﻿@model wedding_planer_ad.Models.ViewModels.AdminReportViewModel
+
+@{
+    Layout = "~/Views/Admin/_AdminLayout.cshtml";
+    ViewData["Title"] = "Wedding planner Dashboard";
+}
+
+<h2 class="mb-4">Admin Reports</h2>
+
+<div class="card p-4 shadow-sm">
+    <h4>Statistics Summary</h4>
+    <table class="table table-bordered mt-3">
+        <tr>
+            <th>Total Weddings</th>
+            <td>@Model.TotalWeddings</td>
+        </tr>
+        <tr>
+            <th>Completed Weddings</th>
+            <td>@Model.CompletedWeddings</td>
+        </tr>
+        <tr>
+            <th>Total Planners</th>
+            <td>@Model.TotalPlanners</td>
+        </tr>
+        <tr>
+            <th>Total Vendors</th>
+            <td>@Model.TotalVendors</td>
+        </tr>
+        <tr>
+            <th>Total Couples</th>
+            <td>@Model.TotalCouples</td>
+        </tr>
+        <tr>
+            <th>Total Bookings</th>
+            <td>@Model.TotalBookings</td>
+        </tr>
+        <tr>
+            <th>Total Budget</th>
+            <td>Rs. @Model.TotalBudget.ToString("N2")</td>
+        </tr>
+        <tr>
+            <th>Average Wedding Budget</th>
+            <td>Rs. @Model.AverageWeddingBudget.ToString("N2")</td>
+        </tr>
+        <tr>
+            <th>Weddings This Week</th>
+            <td>@Model.WeddingsThisWeek</td>
+        </tr>
+        <tr>
+            <th>Weddings This Month</th>
+            <td>@Model.WeddingsThisMonth</td>
+        </tr>
+        <tr>
+            <th>Bookings This Week</th>
+            <td>@Model.BookingsThisWeek</td>
+        </tr>
+        <tr>
+            <th>Bookings This Month</th>
+            <td>@Model.BookingsThisMonth</td>
+        </tr>
+
+    </table>
+    <div class="mt-4">
+        <a href="@Url.Action("DownloadPdfReport", "Admin")" class="btn btn-danger me-2">
+            <i class="fas fa-file-pdf"></i> Full Report
+        </a>
+        <a href="@Url.Action("DownloadWeeklyReport", "Admin")" class="btn btn-primary me-2">
+            <i class="fas fa-calendar-week"></i> Weekly Report
+        </a>
+        <a href="@Url.Action("DownloadMonthlyReport", "Admin")" class="btn btn-success">
+            <i class="fas fa-calendar-alt"></i> Monthly Report
+        </a>
+    </div>
+
+</div>

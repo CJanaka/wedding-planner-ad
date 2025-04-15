@@ -6,10 +6,12 @@ using wedding_planer_ad.Exceptions;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using wedding_planer_ad.Models.DTO;
+using Microsoft.AspNetCore.Authorization;
 
 
 namespace wedding_planer_ad.Controllers
 {
+    [Authorize(Roles = "Admin")]
     public class WeddingPlannersController : Controller
     {
         private readonly IWeddingPlannerService _plannerService;
@@ -127,7 +129,7 @@ namespace wedding_planer_ad.Controllers
 
         public async Task<IActionResult> ViewMembers(int coupleId)
         {
-            var members = await _plannerService.GetMembersByCoupleIdAsync(coupleId);
+            var members = await _plannerService.GetCoupleByUserId(coupleId);
             return View(members);
         }
 

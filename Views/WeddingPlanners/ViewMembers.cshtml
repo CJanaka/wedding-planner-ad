@@ -1,37 +1,71 @@
-﻿@model IEnumerable<wedding_planer_ad.Models.DTO.CoupleMemberDto>
+﻿@model wedding_planer_ad.Models.ApplicationUser
 
 @{
     Layout = "~/Views/WeddingPlanners/_WeddingPlannerLayout.cshtml";
-    ViewData["Title"] = "Wedding planner Dashboard";
+    ViewData["Title"] = "Wedding Planner Dashboard";
 }
+
+<style>
+    .profile-card {
+        background-color: #fff;
+        padding: 30px;
+        border-radius: 12px;
+        box-shadow: 0 4px 10px rgba(0, 0, 0, 0.05);
+        max-width: 600px;
+        margin: 20px auto;
+    }
+
+    .form-group {
+        margin-bottom: 20px;
+    }
+
+    label {
+        font-weight: 600;
+        margin-bottom: 5px;
+        display: block;
+        color: #333;
+    }
+
+    input.form-control[readonly] {
+        background-color: #f8f9fa;
+        color: #495057;
+        border: 1px solid #ced4da;
+    }
+
+    h2 {
+        text-align: center;
+        margin-bottom: 30px;
+        color: #343a40;
+    }
+</style>
 
 <h2>Couple Details</h2>
 
-@if (!Model.Any())
+@if (Model == null)
 {
-    <div class="alert alert-info">No details found.</div>
+    <div class="alert alert-info text-center">No details found.</div>
 }
 else
 {
-    <table class="table table-bordered">
-        <thead>
-            <tr>
-                <th>Couple ID</th>
-                <th>User ID</th>
-                <th>User Name</th>
-                <th>Email</th>
-            </tr>
-        </thead>
-        <tbody>
-            @foreach (var member in Model)
-            {
-                <tr>
-                    <td>@member.Id</td>
-                    <td>@member.UserId</td>
-                    <td>@member.UserName</td>
-                    <td>@member.Email</td>
-                </tr>
-            }
-        </tbody>
-    </table>
+    <div class="profile-card">
+        <div class="form-group">
+            <label>First Name</label>
+            <input type="text" class="form-control" value="@Model.FirstName" readonly />
+        </div>
+
+        <div class="form-group">
+            <label>Last Name</label>
+            <input type="text" class="form-control" value="@Model.LastName" readonly />
+        </div>
+
+        <div class="form-group">
+            <label>User Name</label>
+            <input type="text" class="form-control" value="@Model.UserName" readonly />
+        </div>
+
+        <div class="form-group">
+            <label>Email</label>
+            <input type="email" class="form-control" value="@Model.Email" readonly />
+        </div>
+    </div>
 }

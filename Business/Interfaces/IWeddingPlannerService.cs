@@ -50,6 +50,9 @@ namespace wedding_planer_ad.Business.Interfaces
         Task<Dictionary<string, int>> GetWeddingsPerMonthAsync(string plannerUserId);
         Task<AdminDashboardViewModel> GetAdminDashboardDataAsync();
 
+        Task<ApplicationUser> GetCoupleByUserId(int coupleId);
+
+
 
 
 

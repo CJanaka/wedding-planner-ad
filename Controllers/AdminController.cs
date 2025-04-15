@@ -10,7 +10,7 @@ using Microsoft.AspNetCore.Authorization;
 
 namespace wedding_planer_ad.Controllers
 {
-    [Authorize]
+    [Authorize(Roles = "Admin")]
     public class AdminController : Controller
     {
         private readonly IUserService _userService;

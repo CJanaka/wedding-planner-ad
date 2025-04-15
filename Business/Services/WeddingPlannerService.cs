@@ -357,6 +357,16 @@ namespace wedding_planer_ad.Business.Services
             };
         }
 
+        public async Task<ApplicationUser> GetCoupleByUserId(int coupleId)
+        {
+            var couple = await _context.Couple.FirstOrDefaultAsync(c => c.Id == coupleId);
+
+            if (couple == null || string.IsNullOrEmpty(couple.UserId))
+                return null;
+
+            var user = await _userManager.FindByIdAsync(couple.UserId);
+            return user;
+        }
 
 
 

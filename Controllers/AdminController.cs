@@ -1,22 +1,33 @@
-﻿using Microsoft.AspNetCore.Identity;
+﻿using iTextSharp.text.pdf;
+using iTextSharp.text;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using wedding_planer_ad.Business.Interfaces;
+using wedding_planer_ad.Business.Services;
 using wedding_planer_ad.Models;
 using wedding_planer_ad.Models.DTO;
+using Microsoft.AspNetCore.Authorization;
 
 namespace wedding_planer_ad.Controllers
 {
+    [Authorize(Roles = "Admin")]
     public class AdminController : Controller
     {
         private readonly IUserService _userService;
+        private readonly IWeddingPlannerService _weddingService;
+        private readonly IAdminService _adminService;
 
-        public AdminController(IUserService userService)
+
+        public AdminController(IUserService userService, IWeddingPlannerService weddingService,IAdminService adminService)
         {
             _userService = userService;
+            _weddingService = weddingService;
+            _adminService = adminService;
         }
-        public IActionResult Index()
+        public async Task<IActionResult> Index()
         {
-            return View();
+            var model = await _adminService.GetDashboardData();
+            return View(model);
         }
 
         public async Task<IActionResult> Planners()
@@ -246,6 +257,96 @@ namespace wedding_planer_ad.Controllers
             return RedirectToAction("Couples");
         }
 
+        public async Task<IActionResult> Reports()
+        {
+            var model = await _adminService.GetReportData();
+            return View(model);
+        }
 
+        public async Task<IActionResult> DownloadPdfReport()
+        {
+            var model = await _adminService.GetReportData();
+
+            using (var memoryStream = new MemoryStream())
+            {
+                var doc = new Document(PageSize.A4);
+                PdfWriter.GetInstance(doc, memoryStream);
+                doc.Open();
+
+                var titleFont = FontFactory.GetFont(FontFactory.HELVETICA_BOLD, 18);
+                doc.Add(new Paragraph("Wedding Planner Admin Report", titleFont));
+                doc.Add(new Paragraph("Generated: " + DateTime.Now.ToString("f")));
+                doc.Add(new Paragraph(" "));
+
+                var bodyFont = FontFactory.GetFont(FontFactory.HELVETICA, 12);
+                doc.Add(new Paragraph($"Total Weddings: {model.TotalWeddings}", bodyFont));
+                doc.Add(new Paragraph($"Completed Weddings: {model.CompletedWeddings}", bodyFont));
+                doc.Add(new Paragraph($"Total Planners: {model.TotalPlanners}", bodyFont));
+                doc.Add(new Paragraph($"Total Vendors: {model.TotalVendors}", bodyFont));
+                doc.Add(new Paragraph($"Total Couples: {model.TotalCouples}", bodyFont));
+                doc.Add(new Paragraph($"Total Bookings: {model.TotalBookings}", bodyFont));
+                doc.Add(new Paragraph($"Total Budget: Rs. {model.TotalBudget:N2}", bodyFont));
+                doc.Add(new Paragraph($"Average Wedding Budget: Rs. {model.AverageWeddingBudget:N2}", bodyFont));
+
+                doc.Close();
+
+                byte[] pdfBytes = memoryStream.ToArray();
+                return File(pdfBytes, "application/pdf", "AdminReport.pdf");
+            }
+        }
+
+        public async Task<IActionResult> DownloadWeeklyReport()
+        {
+            var model = await _adminService.GetWeeklyReportData();
+
+            using var memoryStream = new MemoryStream();
+            var doc = new Document(PageSize.A4);
+            PdfWriter.GetInstance(doc, memoryStream);
+            doc.Open();
+
+            var titleFont = FontFactory.GetFont(FontFactory.HELVETICA_BOLD, 18);
+            var bodyFont = FontFactory.GetFont(FontFactory.HELVETICA, 12);
+
+            doc.Add(new Paragraph("Weekly Wedding Report", titleFont));
+            doc.Add(new Paragraph("Generated: " + DateTime.Now.ToString("f")));
+            doc.Add(new Paragraph(" "));
+
+            doc.Add(new Paragraph($"Total Weddings: {model.TotalWeddings}", bodyFont));
+            doc.Add(new Paragraph($"Completed Weddings: {model.CompletedWeddings}", bodyFont));
+            doc.Add(new Paragraph($"Total Bookings: {model.TotalBookings}", bodyFont));
+            doc.Add(new Paragraph($"Total Budget: Rs. {model.TotalBudget:N2}", bodyFont));
+            doc.Add(new Paragraph($"Average Wedding Budget: Rs. {model.AverageWeddingBudget:N2}", bodyFont));
+
+            doc.Close();
+            return File(memoryStream.ToArray(), "application/pdf", "WeeklyReport.pdf");
+        }
+
+        public async Task<IActionResult> DownloadMonthlyReport()
+        {
+            var model = await _adminService.GetMonthlyReportData();
+
+            using var memoryStream = new MemoryStream();
+            var doc = new Document(PageSize.A4);
+            PdfWriter.GetInstance(doc, memoryStream);
+            doc.Open();
+
+            var titleFont = FontFactory.GetFont(FontFactory.HELVETICA_BOLD, 18);
+            var bodyFont = FontFactory.GetFont(FontFactory.HELVETICA, 12);
+
+            doc.Add(new Paragraph("Monthly Wedding Report", titleFont));
+            doc.Add(new Paragraph("Generated: " + DateTime.Now.ToString("f")));
+            doc.Add(new Paragraph(" "));
+
+            doc.Add(new Paragraph($"Total Weddings: {model.TotalWeddings}", bodyFont));
+            doc.Add(new Paragraph($"Completed Weddings: {model.CompletedWeddings}", bodyFont));
+            doc.Add(new Paragraph($"Total Bookings: {model.TotalBookings}", bodyFont));
+            doc.Add(new Paragraph($"Total Budget: Rs. {model.TotalBudget:N2}", bodyFont));
+            doc.Add(new Paragraph($"Average Wedding Budget: Rs. {model.AverageWeddingBudget:N2}", bodyFont));
+
+            doc.Close();
+            return File(memoryStream.ToArray(), "application/pdf", "MonthlyReport.pdf");
+        }
     }
+
 }
+

@@ -76,12 +76,12 @@
     <!-- Top Navbar -->
     <nav class="navbar navbar-dark sticky-top shadow p-3">
         <div class="container-fluid d-flex justify-content-between">
-            <a class="navbar-brand" href="#">My Wedding</a>
+            <a class="navbar-brand" href="#">Dream Day</a>
             <div>
                 <span class="text-black-50 me-3">@User.Identity?.Name</span>
                 @if (SignInManager.IsSignedIn(User))
                 {
-                    <form class="d-inline" asp-area="Identity" asp-page="/Account/Logout" asp-route-returnUrl="@Url.Action("Index", "Home", new { area = "" })">
+                    <form class="d-inline" method="post" asp-controller="Account" asp-action="Logout" asp-route-returnUrl="/Identity/Account/Login">
                         <button type="submit" class="btn btn-outline-light btn-sm text-black-50">Logout</button>
                     </form>
                 }

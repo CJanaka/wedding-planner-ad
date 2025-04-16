@@ -7,7 +7,7 @@ namespace wedding_planer_ad.Models
     {
         public string FirstName { get; set; } = "";
         public string LastName { get; set; } = "";
-        public string? Role { get; set; } // "Couple", "Planner", "Vendor", "Admin"
+        public string? Role { get; set; } 
         public string? ProfilePicture { get; set; }
         public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
         public DateTime UpdatedAt { get; set; } = DateTime.UtcNow;

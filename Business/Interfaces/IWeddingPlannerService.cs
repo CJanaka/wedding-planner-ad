@@ -1,6 +1,7 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using wedding_planer_ad.Models;
 using wedding_planer_ad.Models.DTO;
+using wedding_planer_ad.Models.ViewModels;
 
 namespace wedding_planer_ad.Business.Interfaces
 {
@@ -43,6 +44,15 @@ namespace wedding_planer_ad.Business.Interfaces
         Task AddChecklistTaskAsync(WeddingChecklist checklist);
 
         Task<IEnumerable<BookingVendorDTO>> GetBookingByCoupleIdWithVendor(int coupleId);
+
+        Task<WeddingPlannerDashboardViewModel> GetDashboardDataAsync(string plannerUserId);
+
+        Task<Dictionary<string, int>> GetWeddingsPerMonthAsync(string plannerUserId);
+        Task<AdminDashboardViewModel> GetAdminDashboardDataAsync();
+
+        Task<ApplicationUser> GetCoupleByUserId(int coupleId);
+
+
 
 
 

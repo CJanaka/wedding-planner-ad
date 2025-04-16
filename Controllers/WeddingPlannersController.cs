@@ -6,10 +6,12 @@ using wedding_planer_ad.Exceptions;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using wedding_planer_ad.Models.DTO;
+using Microsoft.AspNetCore.Authorization;
 
 
 namespace wedding_planer_ad.Controllers
 {
+    [Authorize(Roles = "Admin")]
     public class WeddingPlannersController : Controller
     {
         private readonly IWeddingPlannerService _plannerService;
@@ -25,9 +27,12 @@ namespace wedding_planer_ad.Controllers
 
         public async Task<IActionResult> Index()
         {
-            var planners = await _plannerService.GetAllAsync();
-            return View(planners);
+            var plannerUserId = _userManager.GetUserId(User);
+            var dashboard = await _plannerService.GetDashboardDataAsync(plannerUserId);
+            dashboard.WeddingsPerMonth = await _plannerService.GetWeddingsPerMonthAsync(plannerUserId);
+            return View(dashboard);
         }
+
 
         public async Task<IActionResult> Details(int? id)
         {
@@ -124,7 +129,7 @@ namespace wedding_planer_ad.Controllers
 
         public async Task<IActionResult> ViewMembers(int coupleId)
         {
-            var members = await _plannerService.GetMembersByCoupleIdAsync(coupleId);
+            var members = await _plannerService.GetCoupleByUserId(coupleId);
             return View(members);
         }
 
@@ -320,7 +325,6 @@ namespace wedding_planer_ad.Controllers
             return View(checklist);
         }
 
-
-
     }
+
 }

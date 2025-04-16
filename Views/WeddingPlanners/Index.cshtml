@@ -1,27 +1,139 @@
-﻿@model IEnumerable<wedding_planer_ad.Models.WeddingPlanner>
+﻿@model wedding_planer_ad.Models.ViewModels.WeddingPlannerDashboardViewModel
 
 @{
     Layout = "~/Views/WeddingPlanners/_WeddingPlannerLayout.cshtml";
-    ViewData["Title"] = "Wedding planner Dashboard";
+    ViewData["Title"] = "Wedding Planner Dashboard";
 }
 
-<h2 class="mb-4">Wedding planner Dashboard</h2>
+<style>
+    .small-chart {
+        width: 250px !important;
+        height: 250px !important;
+        margin: auto;
+    }
+</style>
+
+<h2 class="mb-4">Wedding Planner Dashboard</h2>
 
 <div class="row g-4">
     <div class="col-md-4">
         <div class="card text-white bg-info h-100">
             <div class="card-body">
                 <h5 class="card-title">Total Weddings</h5>
-                <p class="card-text fs-3">20</p>
+                <p class="card-text fs-3">@Model.TotalWeddings</p>
             </div>
         </div>
     </div>
-     <div class="col-md-4">
-         <div class="card text-white bg-info h-100">
-             <div class="card-body">
-                 <h5 class="card-title">Completed Weddings</h5>
-                 <p class="card-text fs-3">5</p>
-             </div>
-         </div>
-     </div>
+    <div class="col-md-4">
+        <div class="card text-white bg-success h-100">
+            <div class="card-body">
+                <h5 class="card-title">Completed Weddings</h5>
+                <p class="card-text fs-3">@Model.CompletedWeddings</p>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-4">
+        <div class="card text-white bg-warning h-100">
+            <div class="card-body">
+                <h5 class="card-title">Upcoming Weddings</h5>
+                <p class="card-text fs-3">@Model.UpcomingWeddings</p>
+            </div>
+        </div>
+    </div>
 </div>
+
+<!-- Total Budget -->
+<div class="row mt-4">
+    <div class="col-md-4">
+        <div class="card text-white bg-primary h-100">
+            <div class="card-body">
+                <h5 class="card-title">Total Budget</h5>
+                <p class="card-text fs-3">Rs. @Model.TotalBudget.ToString("N2")</p>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Charts Row -->
+<div class="row mt-4">
+    <!-- Pie Chart: Left Side -->
+    <div class="col-md-6">
+        <div class="card">
+            <div class="card-body">
+                <h5 class="card-title">Wedding Status</h5>
+                <canvas id="weddingPieChart" class="small-chart"></canvas>
+            </div>
+        </div>
+    </div>
+
+    <!-- Doughnut Chart: Right Side -->
+    <div class="col-md-6">
+        <div class="card">
+            <div class="card-body">
+                <h5 class="card-title">Weddings Per Month</h5>
+                <canvas id="weddingsDoughnutChart" class="small-chart"></canvas>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- ChartJS Library -->
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+<script>
+    // Pie Chart for Completed vs Upcoming Weddings
+    var ctx = document.getElementById('weddingPieChart').getContext('2d');
+    var weddingPieChart = new Chart(ctx, {
+        type: 'pie',
+        data: {
+            labels: ['Completed Weddings', 'Upcoming Weddings'],
+            datasets: [{
+                data: [@Model.CompletedWeddings, @Model.UpcomingWeddings],
+                backgroundColor: ['#28a745', '#ffc107'],
+                borderColor: '#ffffff',
+                borderWidth: 2
+            }]
+        },
+        options: {
+            responsive: true,
+            plugins: {
+                legend: { position: 'top' },
+                tooltip: {
+                    callbacks: {
+                        label: function (tooltipItem) {
+                            return tooltipItem.label + ': ' + tooltipItem.raw;
+                        }
+                    }
+                }
+            }
+        }
+    });
+
+    // Doughnut Chart for Weddings Per Month
+    var ctx2 = document.getElementById('weddingsDoughnutChart').getContext('2d');
+    var weddingsDoughnutChart = new Chart(ctx2, {
+        type: 'doughnut',
+        data: {
+            labels: @Html.Raw(Json.Serialize(Model.WeddingsPerMonth.Keys)),
+            datasets: [{
+                data: @Html.Raw(Json.Serialize(Model.WeddingsPerMonth.Values)),
+                backgroundColor: ['#007bff', '#17a2b8', '#ffc107', '#dc3545', '#28a745', '#6f42c1', '#fd7e14'],
+                borderColor: '#ffffff',
+                borderWidth: 2
+            }]
+        },
+        options: {
+            responsive: true,
+            plugins: {
+                legend: { position: 'top' },
+                tooltip: {
+                    callbacks: {
+                        label: function (tooltipItem) {
+                            return tooltipItem.label + ': ' + tooltipItem.raw;
+                        }
+                    }
+                }
+            }
+        }
+    });
+</script>

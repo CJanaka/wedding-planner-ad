@@ -1,6 +1,7 @@
 ﻿using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using System.Collections.Generic;
+using System.Globalization;
 using System.Linq;
 using System.Threading.Tasks;
 using wedding_planer_ad.Business.Interfaces;
@@ -8,6 +9,7 @@ using wedding_planer_ad.Data;
 using wedding_planer_ad.Exceptions;
 using wedding_planer_ad.Models;
 using wedding_planer_ad.Models.DTO;
+using wedding_planer_ad.Models.ViewModels;
 
 namespace wedding_planer_ad.Business.Services
 {
@@ -254,6 +256,118 @@ namespace wedding_planer_ad.Business.Services
             _context.WeddingChecklist.Add(checklist);
             await _context.SaveChangesAsync();
         }
+
+        public async Task<Dictionary<string, int>> GetWeddingsPerMonthAsync(string plannerUserId)
+        {
+            var weddings = await _context.weddingPlanner
+                .Include(wp => wp.Couple)
+                .Where(wp => wp.PlannerUserId == plannerUserId && !wp.IsDeleted)
+                .ToListAsync();
+
+            var grouped = weddings
+                .GroupBy(w => w.Couple.WeddingDate.Month) // Group by month
+                .OrderBy(g => g.Key) // Sort by month
+                .ToDictionary(
+                    g => CultureInfo.CurrentCulture.DateTimeFormat.GetAbbreviatedMonthName(g.Key), // Get abbreviated month name
+                    g => g.Count() // Get count of weddings for that month
+                );
+
+            // To ensure all months are shown, even those without weddings, initialize them with 0 count
+            var allMonths = CultureInfo.CurrentCulture.DateTimeFormat.AbbreviatedMonthNames.Take(12).ToList();
+
+            foreach (var month in allMonths)
+            {
+                if (!grouped.ContainsKey(month))
+                {
+                    grouped.Add(month, 0); // Add missing months with 0 count
+                }
+            }
+
+            // Return the dictionary sorted by month
+            return grouped.OrderBy(g => Array.IndexOf(allMonths.ToArray(), g.Key)).ToDictionary(g => g.Key, g => g.Value);
+        }
+
+
+
+        public async Task<WeddingPlannerDashboardViewModel> GetDashboardDataAsync(string plannerUserId)
+        {
+            // Get all couples linked to this wedding planner
+            var couples = await _context.Couple
+                .Where(c => c.Planners.PlannerUserId == plannerUserId && !c.IsDeleted)
+                .ToListAsync();
+
+            // Total Weddings
+            var totalWeddings = couples.Count;
+
+            // Completed Weddings
+            var completedWeddings = couples.Count(c => c.WeddingDate < DateTime.Now);
+
+            // Upcoming Weddings
+            var upcomingWeddings = couples.Count(c => c.WeddingDate > DateTime.Now);
+
+            // Total Budget (sum of all couple budgets)
+            var totalBudget = couples.Sum(c => c.Budget);
+
+            // Weddings per month (for chart)
+            var completedWeddingsPerMonth = couples
+                .Where(c => c.WeddingDate < DateTime.Now)
+                .GroupBy(c => c.WeddingDate.Month)
+                .Select(g => g.Count())
+                .ToList();
+
+            var upcomingWeddingsPerMonth = couples
+                .Where(c => c.WeddingDate > DateTime.Now)
+                .GroupBy(c => c.WeddingDate.Month)
+                .Select(g => g.Count())
+                .ToList();
+
+            return new WeddingPlannerDashboardViewModel
+            {
+                TotalWeddings = totalWeddings,
+                CompletedWeddings = completedWeddings,
+                UpcomingWeddings = upcomingWeddings,
+                TotalBudget = totalBudget,
+                CompletedWeddingsPerMonth = completedWeddingsPerMonth,
+                UpcomingWeddingsPerMonth = upcomingWeddingsPerMonth
+            };
+        }
+
+        public async Task<AdminDashboardViewModel> GetAdminDashboardDataAsync()
+        {
+            var couples = await _context.Couple
+                .Where(c => !c.IsDeleted)
+                .ToListAsync();
+
+            int total = couples.Count;
+            int completed = couples.Count(c => c.WeddingDate < DateTime.Now);
+
+            var weddingsPerMonth = couples
+                .GroupBy(c => c.WeddingDate.Month)
+                .OrderBy(g => g.Key)
+                .ToDictionary(
+                    g => CultureInfo.CurrentCulture.DateTimeFormat.GetAbbreviatedMonthName(g.Key),
+                    g => g.Count()
+                );
+
+            return new AdminDashboardViewModel
+            {
+                TotalWeddings = total,
+                CompletedWeddings = completed,
+                WeddingsPerMonth = weddingsPerMonth
+            };
+        }
+
+        public async Task<ApplicationUser> GetCoupleByUserId(int coupleId)
+        {
+            var couple = await _context.Couple.FirstOrDefaultAsync(c => c.Id == coupleId);
+
+            if (couple == null || string.IsNullOrEmpty(couple.UserId))
+                return null;
+
+            var user = await _userManager.FindByIdAsync(couple.UserId);
+            return user;
+        }
+
 
 
 

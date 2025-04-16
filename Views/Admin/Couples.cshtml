@@ -7,6 +7,10 @@
 
 <h2>Couples</h2>
 
+<a class="btn btn-success mb-3" asp-action="AddCouple" asp-controller="Admin">
+    <i class="fas fa-plus"></i> + Add New Couple
+</a>    
+
 <table class="table table-striped">
     <thead>
         <tr>
@@ -19,7 +23,7 @@
     <tbody>
         @foreach (var couple in Model)
         {
-            <tr>
+            <tr onclick="window.location.href='@Url.Action("CoupleDetails", "Admin", new { id = couple.Id })'" style="cursor:pointer;">
                 <td>@couple.Email</td>
                 <td>@couple.FirstName</td>
                 <td>@couple.LastName</td>

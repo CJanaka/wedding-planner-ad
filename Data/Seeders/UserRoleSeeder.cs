@@ -64,7 +64,6 @@ namespace wedding_planer_ad.Data.Seeders
                     }
                     else
                     {
-                        // Log or display errors if needed
                         foreach (var error in result.Errors)
                         {
                             Console.WriteLine($"{email} - Error: {error.Description}");

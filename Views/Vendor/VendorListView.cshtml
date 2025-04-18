@@ -1,0 +1,114 @@
+﻿@*
+    For more information on enabling MVC for empty projects, visit https://go.microsoft.com/fwlink/?LinkID=397860
+*@
+@{
+}
+
+@model wedding_planer_ad.Models.ViewModels.VendorBookingViewModel
+
+<div class="container mt-4">
+    <h1 class="mb-4">Browse Vendors</h1>
+
+    <!-- Filter and search section -->
+    <div class="card mb-4">
+        <div class="card-body">
+            <form method="get" asp-action="VendorListView">
+                <div class="row g-3">
+                    <div class="col-md-3">
+                        <label class="form-label">Search</label>
+                        <input type="text" class="form-control" asp-for="SearchString" placeholder="Search vendors...">
+                    </div>
+                    <div class="col-md-3">
+                        <label class="form-label">Category</label>
+                        <select class="form-select" asp-for="CategoryId">
+                            <option value="">All Categories</option>
+                            @foreach (var category in Model.Categories)
+                            {
+                                <option value="@category.Id">@category.Name</option>
+                            }
+                        </select>
+                    </div>
+                    <div class="col-md-3">
+                        <label class="form-label">Location</label>
+                        <input type="text" class="form-control" asp-for="Location" placeholder="City or area...">
+                    </div>
+                    <div class="col-md-3">
+                        <label class="form-label">Sort By</label>
+                        <select class="form-select" asp-for="SortOrder">
+                            <option value="rating_desc">Highest Rated</option>
+                            <option value="price_asc">Price (Low to High)</option>
+                            <option value="price_desc">Price (High to Low)</option>
+                            <option value="name_asc">Name (A to Z)</option>
+                        </select>
+                    </div>
+                    <div class="col-12">
+                        <button type="submit" class="btn btn-primary me-2">Apply Filters</button>
+                        <a asp-action="VendorListView" class="btn btn-outline-secondary">Clear Filters</a>
+                    </div>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Vendors grid -->
+    <div class="row row-cols-1 row-cols-md-3 g-4">
+        @foreach (var vendor in Model.Vendors)
+        {
+            <div class="col">
+                <div class="card h-100">
+                    @if (!string.IsNullOrEmpty(vendor.ProfilePicture))
+                    {
+                        <img src="@vendor.ProfilePicture" class="card-img-top" alt="@vendor.Name" style="height: 200px; object-fit: cover;">
+                    }
+                    else
+                    {
+                        <div class="bg-light text-center py-5">
+                            <i class="bi bi-image" style="font-size: 3rem;"></i>
+                        </div>
+                    }
+                    <div class="card-body">
+                        <h5 class="card-title">@vendor.Name</h5>
+                        <h6 class="card-subtitle mb-2 text-muted">@(vendor.Category?.Name ?? "Uncategorized")</h6>
+
+                        <div class="mb-2">
+                            @for (int i = 1; i <= 5; i++)
+                            {
+                                if (i <= Math.Round(vendor.Rating))
+                                {
+                                    <i class="bi bi-star-fill text-warning"></i>
+                                }
+                                else if (i - 0.5 <= (double)vendor.Rating)
+                                {
+                                    <i class="bi bi-star-half text-warning"></i>
+                                }
+                                else
+                                {
+                                    <i class="bi bi-star text-warning"></i>
+                                }
+                            }
+                            <span class="ms-1">@vendor.Rating.ToString("0.0")</span>
+                            <span class="text-muted">(@(vendor.Reviews?.Count ?? 0) reviews)</span>
+                        </div>
+
+                        <p class="card-text">@(vendor.Description?.Length > 100 ? vendor.Description.Substring(0, 100) + "..." : vendor.Description)</p>
+
+                        <div class="d-flex justify-content-between align-items-center">
+                            <span class="fw-bold">Starting at $@vendor.Pricing</span>
+                            <span class="text-muted"><i class="bi bi-geo-alt"></i> @vendor.Location</span>
+                        </div>
+                    </div>
+                    <div class="card-footer bg-white border-top-0">
+                        <a asp-action="VendorDetailView" asp-route-id="@vendor.Id" class="btn btn-outline-primary w-100">View Details</a>
+                    </div>
+                </div>
+            </div>
+        }
+    </div>
+
+    @if (!Model.Vendors.Any())
+    {
+        <div class="alert alert-info my-4">
+            No vendors found matching your criteria.
+        </div>
+    }
+</div>

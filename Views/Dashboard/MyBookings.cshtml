@@ -1,0 +1,100 @@
+﻿@*
+    For more information on enabling MVC for empty projects, visit https://go.microsoft.com/fwlink/?LinkID=397860
+*@
+@{
+}
+
+@model IEnumerable<wedding_planer_ad.Models.Booking>
+
+<div class="container mt-4">
+    <h1 class="mb-4">My Bookings</h1>
+
+    @if (TempData["SuccessMessage"] != null)
+    {
+        <div class="alert alert-success alert-dismissible fade show" role="alert">
+            @TempData["SuccessMessage"]
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+        </div>
+    }
+
+    <div class="row">
+        <div class="col-md-12">
+            @if (Model.Any())
+            {
+                <div class="table-responsive">
+                    <table class="table table-striped">
+                        <thead>
+                            <tr>
+                                <th>Vendor</th>
+                                <th>Service</th>
+                                <th>Date</th>
+                                <th>Amount</th>
+                                <th>Status</th>
+                                <th>Payment</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @foreach (var booking in Model)
+                            {
+                                <tr>
+                                    <td>@booking.Vendor.Name</td>
+                                    <td>
+                                        @{
+                                            var service = booking.Vendor.Services.FirstOrDefault(s => s.Id == booking.ServiceId);
+                                            @(service?.ServiceName ?? "N/A")
+                                        }
+                                    </td>
+                                    <td>@booking.BookingDate.ToString("MMM dd, yyyy")</td>
+                                    <td>$@booking.TotalAmount.ToString("#,##0.00")</td>
+                                    <td>
+                                        <span class="badge @(booking.Status == "Confirmed" ? "bg-success" :
+                                                            (booking.Status == "Pending" ? "bg-warning" :
+                                                            (booking.Status == "Cancelled" ? "bg-danger" : "bg-secondary")))">
+                                            @booking.Status
+                                        </span>
+                                    </td>
+                                    <td>
+                                        <span class="badge @(booking.PaymentStatus == "Paid" ? "bg-success" :
+                                                            (booking.PaymentStatus == "Partially Paid" ? "bg-info" : "bg-danger"))">
+                                            @booking.PaymentStatus
+                                        </span>
+                                    </td>
+                                    <td>
+                                        <div class="btn-group">
+                                            <button type="button" class="btn btn-sm btn-outline-primary dropdown-toggle" data-bs-toggle="dropdown">
+                                                Actions
+                                            </button>
+                                            <ul class="dropdown-menu">
+                                                <li><a class="dropdown-item" href="#">View Details</a></li>
+                                                @if (booking.Status == "Pending" || booking.Status == "Confirmed")
+                                                {
+                                                    <li><a class="dropdown-item" href="#">Cancel Booking</a></li>
+                                                }
+                                                @if (booking.PaymentStatus != "Paid" && booking.Status != "Cancelled")
+                                                {
+                                                    <li><a class="dropdown-item" href="#">Make Payment</a></li>
+                                                }
+                                                @if (booking.Status == "Confirmed" || booking.Status == "Completed")
+                                                {
+                                                    <li><a class="dropdown-item" href="#">Leave Review</a></li>
+                                                }
+                                            </ul>
+                                        </div>
+                                    </td>
+                                </tr>
+                            }
+                        </tbody>
+                    </table>
+                </div>
+            }
+            else
+            {
+                <div class="alert alert-info">
+                    <p>You don't have any bookings yet.</p>
+                    <a asp-action="Index" class="btn btn-primary mt-3">Browse Vendors</a>
+                </div>
+            }
+        </div>
+    </div>
+</div>

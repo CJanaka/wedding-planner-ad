@@ -129,7 +129,7 @@ namespace wedding_planer_ad.Areas.Identity.Pages.Account
                     }
                     else if (await _userManager.IsInRoleAsync(user, "Couple"))
                     {
-                        return LocalRedirect("~/Couple/Index");
+                        return LocalRedirect("~/Dashboard");
                     }
                 }
                 if (result.RequiresTwoFactor)

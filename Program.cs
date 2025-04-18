@@ -18,6 +18,7 @@ builder.Services.AddDbContext<ApplicationDbContext>(options =>
 builder.Services.AddScoped<IWeddingPlannerService, WeddingPlannerService>();
 builder.Services.AddScoped<IUserService, UserService>();
 builder.Services.AddScoped<IAdminService, AdminService>();
+builder.Services.AddScoped<ICoupleDashboardService, CoupleDashboardService>();
 
 builder.Services.AddIdentity<ApplicationUser, IdentityRole>(options =>
 {

@@ -22,6 +22,10 @@ namespace wedding_planer_ad.Data
         public DbSet<Guest> Guest { get; set; }
 
         public DbSet<Couple> Couple { get; set; }
+        public DbSet<Vendor> Vendor { get; set; }
+        public DbSet<VendorCat> VendorCat { get; set; }
+        public DbSet<Review> Review { get; set; }
+        public DbSet<VendorService> VendorService { get; set; }
 
         public DbSet<WeddingTimeline> WeddingTimeline { get; set; }
 

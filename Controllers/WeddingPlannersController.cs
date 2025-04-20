@@ -12,7 +12,7 @@ using System.Diagnostics;
 
 namespace wedding_planer_ad.Controllers
 {
-    [Authorize(Roles = "Admin")]
+    [Authorize(Roles = "Planner")]
     public class WeddingPlannersController : Controller
     {
         private readonly IWeddingPlannerService _plannerService;

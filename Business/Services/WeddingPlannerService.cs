@@ -11,13 +11,13 @@ using wedding_planer_ad.Models;
 using wedding_planer_ad.Models.DTO;
 using wedding_planer_ad.Models.ViewModels;
 
+
 namespace wedding_planer_ad.Business.Services
 {
     public class WeddingPlannerService : IWeddingPlannerService
     {
         private readonly ApplicationDbContext _context;
         private readonly UserManager<ApplicationUser> _userManager;
-
 
         public WeddingPlannerService(ApplicationDbContext context, UserManager<ApplicationUser> userManager)
         {
@@ -27,24 +27,38 @@ namespace wedding_planer_ad.Business.Services
 
         public async Task<IEnumerable<WeddingPlanner>> GetAllAsync()
         {
-            return await _context.weddingPlanner
-                .Where(wp => !wp.IsDeleted)
-                .Include(wp => wp.Couple)
-                .ToListAsync();
+            try
+            {
+                return await _context.weddingPlanner
+                    .Where(wp => !wp.IsDeleted)
+                    .Include(wp => wp.Couple)
+                    .ToListAsync();
+            }
+            catch (Exception ex)
+            {
+                throw new Exception("Error retrieving all wedding planners.", ex);
+            }
         }
 
         public async Task<WeddingPlanner> GetByIdAsync(int id)
         {
-            var planner = await _context.weddingPlanner
-                .Include(wp => wp.Couple)
-                .FirstOrDefaultAsync(wp => wp.Id == id && !wp.IsDeleted);
-
-            if (planner == null)
+            try
             {
-                throw new ResourceNotFoundException($"WeddingPlanner with id {id} not found.");
-            }
+                var planner = await _context.weddingPlanner
+                    .Include(wp => wp.Couple)
+                    .FirstOrDefaultAsync(wp => wp.Id == id && !wp.IsDeleted);
 
-            return planner;
+                if (planner == null)
+                {
+                    throw new ResourceNotFoundException($"WeddingPlanner with id {id} not found.");
+                }
+
+                return planner;
+            }
+            catch (Exception ex)
+            {
+                throw new Exception($"Error retrieving wedding planner with id {id}.", ex);
+            }
         }
 
 
@@ -58,193 +72,295 @@ namespace wedding_planer_ad.Business.Services
 
         public async Task<bool> UpdateAsync(WeddingPlanner planner)
         {
-            var existing = await _context.weddingPlanner.FindAsync(planner.Id);
+            try
+            {
+                var existing = await _context.weddingPlanner.FindAsync(planner.Id);
 
-            if (existing == null || existing.IsDeleted)
-                throw new ResourceNotFoundException($"WeddingPlanner with id {planner.Id} not found.");
+                if (existing == null || existing.IsDeleted)
+                    throw new ResourceNotFoundException($"WeddingPlanner with id {planner.Id} not found.");
 
-            if (!string.IsNullOrEmpty(planner.PlannerUserId))
-                existing.PlannerUserId = planner.PlannerUserId;
+                if (!string.IsNullOrEmpty(planner.PlannerUserId))
+                    existing.PlannerUserId = planner.PlannerUserId;
 
-            if (planner.CoupleId != 0)
-                existing.CoupleId = planner.CoupleId;
+                if (planner.CoupleId != 0)
+                    existing.CoupleId = planner.CoupleId;
 
-            if (planner.AssignedDate != default)
-                existing.AssignedDate = planner.AssignedDate;
+                if (planner.AssignedDate != default)
+                    existing.AssignedDate = planner.AssignedDate;
 
+            }
+            catch (Exception ex) { 
+                throw new Exception("Error updating wedding planner.", ex);
 
+            }
             await _context.SaveChangesAsync();
             return true;
         }
 
-
         public async Task<bool> DeleteAsync(int id)
         {
-            var planner = await _context.weddingPlanner.FindAsync(id);
+            try
+            {
+                var planner = await _context.weddingPlanner.FindAsync(id);
 
-            if (planner == null || planner.IsDeleted)
-                throw new ResourceNotFoundException($"WeddingPlanner with id {id} not found or already deleted.");
+                if (planner == null || planner.IsDeleted)
+                    throw new ResourceNotFoundException($"WeddingPlanner with id {id} not found or already deleted.");
 
-            planner.IsDeleted = true;
-            await _context.SaveChangesAsync();
-            return true;
+                planner.IsDeleted = true;
+                await _context.SaveChangesAsync();
+                return true;
+            }
+            catch (Exception ex)
+            {
+                throw new Exception("Error deleting wedding planner.", ex);
+            }
         }
 
         public async Task<IEnumerable<Couple>> GetWeddingsByPlannerUserIdAsync(string plannerUserId)
         {
-            return await _context.weddingPlanner
-                .Where(wp => wp.PlannerUserId == plannerUserId && !wp.IsDeleted)
-                .Include(wp => wp.Couple)
-                    .ThenInclude(c => c.Guests)
-                .Include(wp => wp.Couple.Checklists)
-                .Include(wp => wp.Couple.Bookings)
-                .Select(wp => wp.Couple)
-                .ToListAsync();
+            try
+            {
+                return await _context.weddingPlanner
+                    .Where(wp => wp.PlannerUserId == plannerUserId && !wp.IsDeleted)
+                    .Include(wp => wp.Couple)
+                        .ThenInclude(c => c.Guests)
+                    .Include(wp => wp.Couple.Checklists)
+                    .Include(wp => wp.Couple.Bookings)
+                    .Select(wp => wp.Couple)
+                    .ToListAsync();
+            }
+            catch (Exception ex)
+            {
+                throw new Exception("Error retrieving weddings by planner user ID.", ex);
+            }
         }
-
-
 
         public async Task<IEnumerable<WeddingChecklist>> GetChecklistsByCoupleIdAsync(int coupleId)
         {
-            return await _context.WeddingChecklist
-                .Where(wc => wc.CoupleId == coupleId && !wc.IsDeleted)
-                .ToListAsync();
+            try
+            {
+                return await _context.WeddingChecklist
+                    .Where(wc => wc.CoupleId == coupleId && !wc.IsDeleted)
+                    .ToListAsync();
+            }
+            catch (Exception ex)
+            {
+                throw new Exception("Error retrieving checklists by couple ID.", ex);
+            }
         }
 
         public async Task<IEnumerable<CoupleMemberDto>> GetMembersByCoupleIdAsync(int coupleId)
         {
-            var members = await _context.CoupleMember
-                .Where(cm => cm.CoupleId == coupleId && !cm.IsDeleted)
-                .ToListAsync();
-
-            var result = new List<CoupleMemberDto>();
-            Console.Write(result);
-
-            foreach (var member in members)
+            try
             {
-                Console.WriteLine(member);
+                var members = await _context.CoupleMember
+                    .Where(cm => cm.CoupleId == coupleId && !cm.IsDeleted)
+                    .ToListAsync();
 
-                var user = await _userManager.FindByIdAsync(member.UserId);
-                if (user != null)
+                var result = new List<CoupleMemberDto>();
+                foreach (var member in members)
                 {
-                    result.Add(new CoupleMemberDto
+                    var user = await _userManager.FindByIdAsync(member.UserId);
+                    if (user != null)
                     {
-                        Id = member.Id,
-                        UserId = member.UserId,
-                        UserName = user.UserName ?? string.Empty,
-                        Email = user.Email ?? string.Empty
-                    });
+                        result.Add(new CoupleMemberDto
+                        {
+                            Id = member.Id,
+                            UserId = member.UserId,
+                            UserName = user.UserName ?? string.Empty,
+                            Email = user.Email ?? string.Empty
+                        });
+                    }
                 }
-            }
 
-            return result;
+                return result;
+            }
+            catch (Exception ex)
+            {
+                throw new Exception("Error retrieving couple members.", ex);
+            }
         }
 
         public async Task<IEnumerable<Guest>> GetGuestsByCoupleIdAsync(int coupleId)
         {
-            return await _context.Guest
-                .Where(g => g.CoupleId == coupleId && !g.IsDeleted)
-                .ToListAsync();
+            try
+            {
+                return await _context.Guest
+                    .Where(g => g.CoupleId == coupleId && !g.IsDeleted)
+                    .ToListAsync();
+            }
+            catch (Exception ex)
+            {
+                throw new Exception("Error retrieving guests by couple ID.", ex);
+            }
         }
 
         public async Task<IEnumerable<WeddingBudget>> GetBudgetsByCoupleIdAsync(int coupleId)
         {
-            return await _context.WeddingBudget
-                .Where(wb => wb.CoupleId == coupleId && !wb.IsDeleted)
-                .ToListAsync();
+            try
+            {
+                return await _context.WeddingBudget
+                    .Where(wb => wb.CoupleId == coupleId && !wb.IsDeleted)
+                    .ToListAsync();
+            }
+            catch (Exception ex)
+            {
+                throw new Exception("Error retrieving budgets by couple ID.", ex);
+            }
         }
 
         public async Task<IEnumerable<WeddingTimeline>> GetTimelineByCoupleIdAsync(int coupleId)
         {
-            return await _context.WeddingTimeline
-                .Where(wb => wb.CoupleId == coupleId && !wb.IsDeleted)
-                .ToListAsync();
+            try
+            {
+                return await _context.WeddingTimeline
+                    .Where(wb => wb.CoupleId == coupleId && !wb.IsDeleted)
+                    .ToListAsync();
+            }
+            catch (Exception ex)
+            {
+                throw new Exception("Error retrieving timeline by couple ID.", ex);
+            }
         }
 
         public async Task<IEnumerable<Booking>> GetBookingByCoupleId(int coupleId)
         {
-            return await _context.Booking
-                .Where(wb => wb.CoupleId == coupleId && !wb.IsDeleted)
-                .ToListAsync();
+            try
+            {
+                return await _context.Booking
+                    .Where(wb => wb.CoupleId == coupleId && !wb.IsDeleted)
+                    .ToListAsync();
+            }
+            catch (Exception ex)
+            {
+                throw new Exception("Error retrieving bookings by couple ID.", ex);
+            }
         }
 
         public async Task<IEnumerable<BookingVendorDTO>> GetBookingByCoupleIdWithVendor(int coupleId)
         {
-            // Fetch bookings along with the related vendor details
-            var bookings = await _context.Booking
-                .Where(b => b.CoupleId == coupleId && !b.IsDeleted)
-                .Include(b => b.Vendor)  // Include Vendor details
-                .ToListAsync();
-
-            // Map the bookings to BookingVendorDTO with vendor details
-            var bookingVendorDTOs = bookings.Select(booking => new BookingVendorDTO
+            try
             {
-                VendorName = booking.Vendor.Name,
-                VendorDescription = booking.Vendor.Description,
-                VendorPricing = booking.Vendor.Pricing,
-                BookingDate = booking.BookingDate,
-                ServiceDetails = booking.ServiceDetails
-            }).ToList();
+                var bookings = await _context.Booking
+                    .Where(b => b.CoupleId == coupleId && !b.IsDeleted)
+                    .Include(b => b.Vendor)
+                    .ToListAsync();
 
-            return bookingVendorDTOs;
+                return bookings.Select(booking => new BookingVendorDTO
+                {
+                    VendorName = booking.Vendor.Name,
+                    VendorDescription = booking.Vendor.Description,
+                    VendorPricing = booking.Vendor.Pricing,
+                    BookingDate = booking.BookingDate,
+                    ServiceDetails = booking.ServiceDetails
+                }).ToList();
+            }
+            catch (Exception ex)
+            {
+                throw new Exception("Error retrieving bookings with vendors.", ex);
+            }
         }
 
         public async Task<WeddingTimeline> GetTimelineByIdAsync(int id)
         {
-            return await _context.WeddingTimeline.FirstOrDefaultAsync(t => t.Id == id);
+            try
+            {
+                return await _context.WeddingTimeline.FirstOrDefaultAsync(t => t.Id == id);
+            }
+            catch (Exception ex)
+            {
+                throw new Exception("Error retrieving timeline by ID.", ex);
+            }
         }
 
         public async Task UpdateTimelineAsync(WeddingTimeline timeline)
         {
-            _context.WeddingTimeline.Update(timeline);
-            await _context.SaveChangesAsync();
+            try
+            {
+                _context.WeddingTimeline.Update(timeline);
+                await _context.SaveChangesAsync();
+            }
+            catch (Exception ex)
+            {
+                throw new Exception("Error updating timeline.", ex);
+            }
         }
 
         public async Task DeleteTimelineAsync(int id)
         {
-            var timeline = await _context.WeddingTimeline.FindAsync(id);
-            if (timeline != null)
+            try
             {
-                _context.WeddingTimeline.Remove(timeline);
-                await _context.SaveChangesAsync();
+                var timeline = await _context.WeddingTimeline.FindAsync(id);
+                if (timeline != null)
+                {
+                    _context.WeddingTimeline.Remove(timeline);
+                    await _context.SaveChangesAsync();
+                }
+            }
+            catch (Exception ex)
+            {
+                throw new Exception("Error deleting timeline.", ex);
             }
         }
 
         public async Task AddTimelineAsync(WeddingTimeline timeline)
         {
-            var coupleExists = await _context.Couple.AnyAsync(c => c.Id == timeline.CoupleId);
-            Console.WriteLine($"CoupleId {timeline.CoupleId} exists: {coupleExists}");
-
-            if (!coupleExists)
+            try
             {
-                Console.WriteLine($"Invalid Couple ID: {timeline.CoupleId}");
-                throw new ArgumentException("Invalid Couple ID. The couple does not exist.");
+                var coupleExists = await _context.Couple.AnyAsync(c => c.Id == timeline.CoupleId);
+                if (!coupleExists)
+                {
+                    throw new ArgumentException("Invalid Couple ID. The couple does not exist.");
+                }
+
+                _context.WeddingTimeline.Add(timeline);
+                await _context.SaveChangesAsync();
             }
-
-            _context.WeddingTimeline.Add(timeline);
-            await _context.SaveChangesAsync();
-            Console.WriteLine("Timeline added successfully.");
+            catch (Exception ex)
+            {
+                throw new Exception("Error adding timeline.", ex);
+            }
         }
-
 
         public async Task<WeddingChecklist> GetChecklistByIdAsync(int id)
         {
-            return await _context.WeddingChecklist.FindAsync(id);
+            try
+            {
+                return await _context.WeddingChecklist.FindAsync(id);
+            }
+            catch (Exception ex)
+            {
+                throw new Exception("Error retrieving checklist by ID.", ex);
+            }
         }
 
         public async Task UpdateChecklistAsync(WeddingChecklist checklist)
         {
-            _context.WeddingChecklist.Update(checklist);
-            await _context.SaveChangesAsync();
+            try
+            {
+                _context.WeddingChecklist.Update(checklist);
+                await _context.SaveChangesAsync();
+            }
+            catch (Exception ex)
+            {
+                throw new Exception("Error updating checklist.", ex);
+            }
         }
 
         public async Task DeleteChecklistAsync(int id)
         {
-            var item = await _context.WeddingChecklist.FindAsync(id);
-            if (item != null)
+            try
             {
-                _context.WeddingChecklist.Remove(item);
-                await _context.SaveChangesAsync();
+                var item = await _context.WeddingChecklist.FindAsync(id);
+                if (item != null)
+                {
+                    _context.WeddingChecklist.Remove(item);
+                    await _context.SaveChangesAsync();
+                }
+            }
+            catch (Exception ex)
+            {
+                throw new Exception("Error deleting checklist.", ex);
             }
         }
 
@@ -253,120 +369,122 @@ namespace wedding_planer_ad.Business.Services
             checklist.AssignedTo = string.Empty;
             checklist.IsDeleted = false;
             checklist.IsCompleted = false;
+            try
+            {
+                checklist.AssignedTo = string.Empty;
+                checklist.IsDeleted = false;
 
-            _context.WeddingChecklist.Add(checklist);
-            await _context.SaveChangesAsync();
+                _context.WeddingChecklist.Add(checklist);
+                await _context.SaveChangesAsync();
+            }
+            catch (Exception ex)
+            {
+                throw new Exception("Error adding checklist task.", ex);
+            }
         }
 
         public async Task<Dictionary<string, int>> GetWeddingsPerMonthAsync(string plannerUserId)
         {
-            var weddings = await _context.weddingPlanner
-                .Include(wp => wp.Couple)
-                .Where(wp => wp.PlannerUserId == plannerUserId && !wp.IsDeleted)
-                .ToListAsync();
-
-            var grouped = weddings
-                .GroupBy(w => w.Couple.WeddingDate.Month) // Group by month
-                .OrderBy(g => g.Key) // Sort by month
-                .ToDictionary(
-                    g => CultureInfo.CurrentCulture.DateTimeFormat.GetAbbreviatedMonthName(g.Key), // Get abbreviated month name
-                    g => g.Count() // Get count of weddings for that month
-                );
-
-            // To ensure all months are shown, even those without weddings, initialize them with 0 count
-            var allMonths = CultureInfo.CurrentCulture.DateTimeFormat.AbbreviatedMonthNames.Take(12).ToList();
-
-            foreach (var month in allMonths)
+            try
             {
-                if (!grouped.ContainsKey(month))
+                var weddings = await _context.weddingPlanner
+                    .Include(wp => wp.Couple)
+                    .Where(wp => wp.PlannerUserId == plannerUserId && !wp.IsDeleted)
+                    .ToListAsync();
+
+                var grouped = weddings
+                    .GroupBy(w => w.Couple.WeddingDate.Month)
+                    .OrderBy(g => g.Key)
+                    .ToDictionary(
+                        g => CultureInfo.CurrentCulture.DateTimeFormat.GetAbbreviatedMonthName(g.Key),
+                        g => g.Count()
+                    );
+
+                var allMonths = CultureInfo.CurrentCulture.DateTimeFormat.AbbreviatedMonthNames.Take(12).ToList();
+
+                foreach (var month in allMonths)
                 {
-                    grouped.Add(month, 0); // Add missing months with 0 count
+                    if (!grouped.ContainsKey(month))
+                    {
+                        grouped.Add(month, 0);
+                    }
                 }
+
+                return grouped.OrderBy(g => Array.IndexOf(allMonths.ToArray(), g.Key)).ToDictionary(g => g.Key, g => g.Value);
             }
-
-            // Return the dictionary sorted by month
-            return grouped.OrderBy(g => Array.IndexOf(allMonths.ToArray(), g.Key)).ToDictionary(g => g.Key, g => g.Value);
+            catch (Exception ex)
+            {
+                throw new Exception("Error calculating weddings per month.", ex);
+            }
         }
-
-
 
         public async Task<WeddingPlannerDashboardViewModel> GetDashboardDataAsync(string plannerUserId)
         {
-            // Get all couples linked to this wedding planner
-            var couples = await _context.Couple
-                .Where(c => c.Planners.PlannerUserId == plannerUserId && !c.IsDeleted)
-                .ToListAsync();
-
-            // Total Weddings
-            var totalWeddings = couples.Count;
-
-            // Completed Weddings
-            var completedWeddings = couples.Count(c => c.WeddingDate < DateTime.Now);
-
-            // Upcoming Weddings
-            var upcomingWeddings = couples.Count(c => c.WeddingDate > DateTime.Now);
-
-            // Total Budget (sum of all couple budgets)
-            var totalBudget = couples.Sum(c => c.Budget);
-
-            // Weddings per month (for chart)
-            var completedWeddingsPerMonth = couples
-                .Where(c => c.WeddingDate < DateTime.Now)
-                .GroupBy(c => c.WeddingDate.Month)
-                .Select(g => g.Count())
-                .ToList();
-
-            var upcomingWeddingsPerMonth = couples
-                .Where(c => c.WeddingDate > DateTime.Now)
-                .GroupBy(c => c.WeddingDate.Month)
-                .Select(g => g.Count())
-                .ToList();
-
-            return new WeddingPlannerDashboardViewModel
+            try
             {
-                TotalWeddings = totalWeddings,
-                CompletedWeddings = completedWeddings,
-                UpcomingWeddings = upcomingWeddings,
-                TotalBudget = totalBudget,
-                CompletedWeddingsPerMonth = completedWeddingsPerMonth,
-                UpcomingWeddingsPerMonth = upcomingWeddingsPerMonth
-            };
+                var couples = await _context.Couple
+                    .Where(c => c.Planners.PlannerUserId == plannerUserId && !c.IsDeleted)
+                    .ToListAsync();
+
+                return new WeddingPlannerDashboardViewModel
+                {
+                    TotalWeddings = couples.Count,
+                    CompletedWeddings = couples.Count(c => c.WeddingDate < DateTime.Now),
+                    UpcomingWeddings = couples.Count(c => c.WeddingDate > DateTime.Now),
+                    TotalBudget = couples.Sum(c => c.Budget),
+                    CompletedWeddingsPerMonth = couples.Where(c => c.WeddingDate < DateTime.Now).GroupBy(c => c.WeddingDate.Month).Select(g => g.Count()).ToList(),
+                    UpcomingWeddingsPerMonth = couples.Where(c => c.WeddingDate > DateTime.Now).GroupBy(c => c.WeddingDate.Month).Select(g => g.Count()).ToList()
+                };
+            }
+            catch (Exception ex)
+            {
+                throw new Exception("Error retrieving wedding planner dashboard data.", ex);
+            }
         }
 
         public async Task<AdminDashboardViewModel> GetAdminDashboardDataAsync()
         {
-            var couples = await _context.Couple
-                .Where(c => !c.IsDeleted)
-                .ToListAsync();
-
-            int total = couples.Count;
-            int completed = couples.Count(c => c.WeddingDate < DateTime.Now);
-
-            var weddingsPerMonth = couples
-                .GroupBy(c => c.WeddingDate.Month)
-                .OrderBy(g => g.Key)
-                .ToDictionary(
-                    g => CultureInfo.CurrentCulture.DateTimeFormat.GetAbbreviatedMonthName(g.Key),
-                    g => g.Count()
-                );
-
-            return new AdminDashboardViewModel
+            try
             {
-                TotalWeddings = total,
-                CompletedWeddings = completed,
-                WeddingsPerMonth = weddingsPerMonth
-            };
+                var couples = await _context.Couple
+                    .Where(c => !c.IsDeleted)
+                    .ToListAsync();
+
+                return new AdminDashboardViewModel
+                {
+                    TotalWeddings = couples.Count,
+                    CompletedWeddings = couples.Count(c => c.WeddingDate < DateTime.Now),
+                    WeddingsPerMonth = couples
+                        .GroupBy(c => c.WeddingDate.Month)
+                        .OrderBy(g => g.Key)
+                        .ToDictionary(
+                            g => CultureInfo.CurrentCulture.DateTimeFormat.GetAbbreviatedMonthName(g.Key),
+                            g => g.Count()
+                        )
+                };
+            }
+            catch (Exception ex)
+            {
+                throw new Exception("Error retrieving admin dashboard data.", ex);
+            }
         }
 
         public async Task<ApplicationUser> GetCoupleByUserId(int coupleId)
         {
-            var couple = await _context.Couple.FirstOrDefaultAsync(c => c.Id == coupleId);
+            try
+            {
+                var couple = await _context.Couple.FirstOrDefaultAsync(c => c.Id == coupleId);
 
-            if (couple == null || string.IsNullOrEmpty(couple.UserId))
-                return null;
+                if (couple == null || string.IsNullOrEmpty(couple.UserId))
+                    return null;
 
-            var user = await _userManager.FindByIdAsync(couple.UserId);
-            return user;
+                var user = await _userManager.FindByIdAsync(couple.UserId);
+                return user;
+            }
+            catch (Exception ex)
+            {
+                throw new Exception("Error retrieving couple by user ID.", ex);
+            }
         }
 
         public async Task<WeddingPlanner> GetByUserId(string id)
@@ -382,3 +500,4 @@ namespace wedding_planer_ad.Business.Services
         }
     }
 }
+

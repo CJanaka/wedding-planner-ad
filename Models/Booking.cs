@@ -7,13 +7,13 @@
         public int VendorId { get; set; }
         public int ServiceId { get; set; }
         public DateTime BookingDate { get; set; }
-        public string ServiceDetails { get; set; }
+        public string? ServiceDetails { get; set; }
         public decimal TotalAmount { get; set; }
         public string Status { get; set; }
-        public string PaymentStatus { get; set; }
+        public string? PaymentStatus { get; set; }
         public bool IsDeleted { get; set; }
-        public ICollection<Payment> Payments { get; set; }
-        public Vendor Vendor { get; set; } // new
-        public ICollection<Review> Reviews { get; set; }
+        public ICollection<Payment>? Payments { get; set; }
+        public Vendor? Vendor { get; set; } // new
+        public ICollection<Review>? Reviews { get; set; }
     }
 }

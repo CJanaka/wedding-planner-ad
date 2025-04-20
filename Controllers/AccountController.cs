@@ -1,5 +1,8 @@
-﻿using Microsoft.AspNetCore.Identity;
+﻿using System.Diagnostics;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
+using wedding_planer_ad.Business.Interfaces;
+using wedding_planer_ad.Business.Services;
 using wedding_planer_ad.Models;
 using wedding_planer_ad.Models.DTO;
 
@@ -9,11 +12,18 @@ namespace wedding_planer_ad.Controllers
     {
         private readonly SignInManager<ApplicationUser> _signInManager;
         private readonly UserManager<ApplicationUser> _userManager;
+        private readonly ICoupleDashboardService _coupleDashboardService;
+        private readonly IWeddingPlannerService _plannerService;
 
-        public AccountController(SignInManager<ApplicationUser> signInManager, UserManager<ApplicationUser> userManager)
+        public AccountController(SignInManager<ApplicationUser> signInManager,
+            UserManager<ApplicationUser> userManager,
+            ICoupleDashboardService coupleDashboardService,
+            IWeddingPlannerService plannerService)
         {
             _signInManager = signInManager;
             _userManager = userManager;
+            _coupleDashboardService = coupleDashboardService;
+            _plannerService = plannerService;
         }
 
         [HttpPost]
@@ -27,7 +37,11 @@ namespace wedding_planer_ad.Controllers
         [HttpGet]
         public IActionResult Register()
         {
-            return View();
+            // Get all active wedding planners to display in the popup
+            var planners = _plannerService.GetAllAsync();
+            ViewBag.Planners = planners;
+
+            return View(new NewCoupleDto());
         }
 
         [HttpPost]
@@ -51,7 +65,37 @@ namespace wedding_planer_ad.Controllers
             {
                 await _userManager.AddToRoleAsync(user, "Couple");
                 await _signInManager.SignInAsync(user, isPersistent: false);
-                return Redirect("/Identity/Account/Login");
+
+
+
+                var couple = new Couple
+                {
+                    UserId = user.Id,
+                    User = user
+                };
+
+                try
+                {
+                    couple = await _coupleDashboardService.CreateAsync(couple);
+
+                    var budgjet = new WeddingBudget
+                    {
+                        CoupleId = couple.Id,
+                        AllocatedAmount = 0,
+                        IsDeleted = false,
+                        SpentAmount = 0,
+                        PaymentDate = DateTime.Now,
+                    };
+
+                    await _coupleDashboardService.CreateBudjetAsync(budgjet);
+                }
+                catch (Exception ex)
+                {
+                    Debug.WriteLine(ex);
+                    throw new InvalidDataException(ex.Message);
+                }
+
+                return Redirect("/Identity/Account/Login"); // Or wherever you want to redirect after successful registration
             }
 
             foreach (var error in result.Errors)

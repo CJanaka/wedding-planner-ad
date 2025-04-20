@@ -21,5 +21,10 @@ namespace wedding_planer_ad.Models.DTO
         [Required]
         [DataType(DataType.Password)]
         public string Password { get; set; }
+
+        public WeddingPlanner? WeddingPlanner { get; set; }
+
+        public int WeddingPlannerId { get; set; }
+
     }
 }

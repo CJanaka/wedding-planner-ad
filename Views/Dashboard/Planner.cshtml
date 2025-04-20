@@ -1,0 +1,114 @@
+﻿@*
+    For more information on enabling MVC for empty projects, visit https://go.microsoft.com/fwlink/?LinkID=397860
+*@
+@model wedding_planer_ad.Models.ViewModels.PlannerDetailsViewModel
+@{
+    Layout = "~/Views/Dashboard/_WeddingPlannerLayout.cshtml";
+    ViewData["Title"] = "Wedding Planners";
+}
+
+@if (TempData["SuccessMessage"] != null)
+     {
+         <div class="alert alert-success">
+            @TempData["SuccessMessage"]
+         </div>
+     }
+
+@if (TempData["ErrorMessage"] != null)
+     {
+        <div class="alert alert-danger">
+           @TempData["ErrorMessage"]
+        </div>
+     }
+
+@if (Model.selectedWeddingPlanner != null)
+{
+    <div class="container mt-4">
+
+        <div class="row">
+            <div class="col-md-8">
+                    <!-- Display Wedding Planner Details -->
+                <h1>Your Selected Wedding Planner</h1>
+                <div class="card mb-4">
+                    <div class="card-body">
+                        <div class="d-flex align-items-center mb-3">
+                            <div class="me-3">
+                                <div class="rounded-circle bg-light d-flex align-items-center justify-content-center" style="width: 70px; height: 70px;">
+                                    <i class="fas fa-user-circle fa-2x text-secondary"></i>
+                                </div>
+                            </div>
+                            <div>
+                                <h5 class="card-title mb-0">Mr/Mrs. @Model.selectedWeddingPlanner.FirstName @Model.selectedWeddingPlanner.LastName</h5>
+                            </div>
+                        </div>
+                        <hr>
+                        <div class="mt-3">
+                            <h6 class="fw-bold">Contact Information</h6>
+                            <p class="card-text mb-1">
+                                <i class="fas fa-envelope me-2"></i> @Model.selectedWeddingPlanner.Email
+                            </p>
+                            <p class="card-text">
+                                <i class="fas fa-phone me-2"></i> @Model.selectedWeddingPlanner.PhoneNumber
+                            </p>
+                            <h6 class="fw-bold">Since</h6>
+                            <p class="card-text">
+                                <i class="fas fa-calendar me-2"></i> @Model.selectedWeddingPlanner.CreatedAt.ToString("yyyy-MM-dd")
+                            </p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+    </div>
+}
+else
+{
+    <!-- Display Wedding Planners List -->
+    <div class="container mt-4">
+        <h1>Wedding Planners</h1>
+        <p>Find the perfect wedding planner for your special day.</p>
+        <div class="row">
+            @foreach (var planner in Model.Planners)
+            {
+                <div class="col-md-4 mb-4">
+                    <div class="card h-100">
+                        <div class="card-body">
+                            <h5 class="card-title">Mr/Mrs. @planner.FirstName</h5>
+                            <p class="card-text">
+                                <small class="text-muted">Since</small>
+                                <i class="fas fa-calendar me-2"></i> @planner.CreatedAt.ToString("yyyy-MM-dd")
+                            </p>
+                            <a asp-action="Details" asp-route-id="@planner.Id" class="btn btn-primary">View Details</a>
+                        </div>
+                    </div>
+                </div>
+            }
+        </div>
+    </div>
+}
+
+@section Scripts {
+    <script>
+        $(document).ready(function() {
+            // Add visual feedback when selecting a date
+            $('#bookingDate').change(function() {
+                if ($(this).val()) {
+                    $(this).addClass('is-valid');
+                } else {
+                    $(this).removeClass('is-valid');
+                }
+            });
+
+            // Form submission with validation
+            $('form').submit(function(e) {
+                if (!$('#bookingDate').val()) {
+                    e.preventDefault();
+                    alert('Please select an available date before booking.');
+                    return false;
+                }
+                return true;
+            });
+        });
+    </script>
+}

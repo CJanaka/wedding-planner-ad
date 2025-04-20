@@ -9,8 +9,10 @@ namespace wedding_planer_ad.Business.Interfaces
     {
         Task<IEnumerable<WeddingPlanner>> GetAllAsync();
         Task<WeddingPlanner> GetByIdAsync(int id);
-        Task<WeddingPlanner> CreateAsync(WeddingPlanner planner);
-        Task<WeddingPlanner> UpdateAsync(WeddingPlanner planner);
+        Task<bool> CreateAsync(WeddingPlanner planner);
+        Task<WeddingPlanner> GetByUserId(string id);
+        Task<WeddingPlanner> GetByCoupleId(int id);
+        Task<bool> UpdateAsync(WeddingPlanner planner);
         Task<bool> DeleteAsync(int id);
 
         Task<IEnumerable<Couple>> GetWeddingsByPlannerUserIdAsync(string plannerUserId);

@@ -6,39 +6,47 @@
     ViewData["Title"] = "Wedding Dashboard";
 }
 
+
 @model Couple
 
-<div class="container-fluid mt-4">
-    <div class="row">
-        <div class="col-md-12">
-            <div class="card">
-                <div class="card-body">
-                    <div class="d-flex justify-content-between align-items-center mb-4">
-                        @*<h2>@Model.Members's Wedding Dashboard</h2>*@
-                        <div class="wedding-date">
-                            <h4>Wedding Date: @Model.WeddingDate.ToString("MMMM d, yyyy")</h4>
-                            <p class="countdown">@((Model.WeddingDate - DateTime.Today).Days) days to go!</p>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
+@if (TempData["SuccessMessage"] != null)
+{
+    <div class="alert alert-success">
+        @TempData["SuccessMessage"]
     </div>
+}
+@if (TempData["ErrorMessage"] != null)
+{
+    <div class="alert alert-danger">
+        @TempData["ErrorMessage"]
+    </div>
+}
 
-    <div class="row mt-4">
-        <!-- Budget Summary Card -->
-        <div class="col-md-4">
+<div class="row mb-4">
+    <!-- Budget Overview -->
+    @if (Model.Budgets != null)
+    {
+        <div class="col-md-6">
             <div class="card">
                 <div class="card-header bg-primary text-white">
                     <h5 class="mb-0">Budget Overview</h5>
                 </div>
                 <div class="card-body">
+                    @{
+                        var budgetPercentage = (Model.Budgets.AllocatedAmount > 0)
+                        ? (Model.Budgets.SpentAmount / Model.Budgets.AllocatedAmount) * 100
+                        : 0;
+                    }
+
                     <div class="progress mb-3">
                         <div class="progress-bar" role="progressbar"
-                             style="width: @(Model.Budgets.AllocatedAmount > 0 ? (Model.Budgets.SpentAmount / Model.Budgets.AllocatedAmount) * 100 : 0)%"
-                             aria-valuenow="@Model.Budgets.SpentAmount" aria-valuemin="0" aria-valuemax="@Model.Budgets.AllocatedAmount">
+                             style="width:@budgetPercentage%"
+                             aria-valuenow="@Model.Budgets.SpentAmount"
+                             aria-valuemin="0"
+                             aria-valuemax="@Model.Budgets.AllocatedAmount">
                         </div>
                     </div>
+
                     <div class="d-flex justify-content-between">
                         <span>Total Budget:</span>
                         <span>$@Model.Budgets.AllocatedAmount.ToString("#,##0.00")</span>
@@ -47,7 +55,7 @@
                         <span>Spent:</span>
                         <span>$@Model.Budgets.SpentAmount.ToString("#,##0.00")</span>
                     </div>
-                    <div class="d-flex justify-content-between font-weight-bold">
+                    <div class="d-flex justify-content-between fw-bold">
                         <span>Remaining:</span>
                         <span>$@((Model.Budgets.AllocatedAmount - Model.Budgets.SpentAmount).ToString("#,##0.00"))</span>
                     </div>
@@ -57,14 +65,19 @@
                 </div>
             </div>
         </div>
+    }
 
-        <!-- Upcoming Dates Card -->
-        <div class="col-md-4">
-            <div class="card">
-                <div class="card-header bg-info text-white">
-                    <h5 class="mb-0">Upcoming Dates</h5>
-                </div>
-                <div class="card-body">
+    <!-- To Do -->
+    <div class="col-md-6">
+        <div class="card">
+            <div class="card-header bg-info text-white">
+                <h5 class="mb-0">ToDo</h5>
+            </div>
+            <div class="card-body">
+
+                @if (Model.Checklists != null && Model.Checklists.Count >0 )
+                {
+                    
                     <ul class="list-group">
                         @foreach (var checklist in Model.Checklists.OrderBy(d => d.DueDate).Take(5))
                         {
@@ -80,496 +93,741 @@
                             </li>
                         }
                     </ul>
-                    <button type="button" class="btn btn-sm btn-outline-info mt-3" data-bs-toggle="modal" data-bs-target="#datesModal">
-                        View All Dates
+                    <button type="button" class="btn btn-sm btn-outline-info mt-3" data-bs-toggle="modal" data-bs-target="#todoModal">
+                        View All
                     </button>
-                </div>
+                }
+                
+                else
+                {
+
+                    <span>ToDo list empty!</span>
+
+                }
+
             </div>
         </div>
+    </div>
+</div>
 
-        <!-- Tasks Progress Card -->
-        <div class="col-md-4">
-
-            <div class="card">
-                <div class="card-header bg-success text-white">
-                    <h5 class="mb-0">Planning Progress</h5>
-                </div>
-                <div class="card-body">
-                    @{
-                        var totalTasks = Model.Checklists.Count(c => !c.IsDeleted);
-                        var completedTasks = Model.Checklists.Count(c => c.IsCompleted && !c.IsDeleted);
-                        var progressPercentage = totalTasks > 0 ? (completedTasks * 100) / totalTasks : 0;
-                    }
-
-                    <div class="progress mb-3">
-                        <div class="progress-bar bg-success" role="progressbar"
-                             style="width: @progressPercentage%"
-                             aria-valuenow="@progressPercentage" aria-valuemin="0" aria-valuemax="100">
-                            @progressPercentage%
-                        </div>
-                    </div>
-
-                    <div class="d-flex justify-content-between">
-                        <span>Completed Tasks:</span>
-                        <span>@completedTasks / @totalTasks</span>
-                    </div>
-
-                    <button type="button" class="btn btn-sm btn-outline-success mt-3" data-bs-toggle="modal" data-bs-target="#tasksModal">
-                        Manage Tasks
-                    </button>
-                </div>
+<div class="row mb-4">
+    <!-- Planning Progress -->
+    <div class="col-md-6">
+        <div class="card">
+            <div class="card-header bg-success text-white">
+                <h5 class="mb-0">Planning Progress</h5>
             </div>
+            <div class="card-body">
+                @{
+                    var totalTasks = Model.Checklists.Count(c => !c.IsDeleted);
+                    var completedTasks = Model.Checklists.Count(c => c.IsCompleted && !c.IsDeleted);
+                    var progressPercentage = totalTasks > 0 ? (completedTasks * 100) / totalTasks : 0;
+                }
 
+                <div class="progress mb-3">
+                    <div class="progress-bar bg-success" role="progressbar"
+                         style="width: @progressPercentage%"
+                         aria-valuenow="@progressPercentage" aria-valuemin="0" aria-valuemax="100">
+                        @progressPercentage%
+                    </div>
+                </div>
+
+                <div class="d-flex justify-content-between">
+                    <span>Completed Tasks:</span>
+                    <span>@completedTasks / @totalTasks</span>
+                </div>
+
+                <button type="button" class="btn btn-sm btn-outline-success mt-3" data-bs-toggle="modal" data-bs-target="#tasksModal">
+                    Manage Tasks
+                </button>
+            </div>
         </div>
     </div>
 
-    <div class="row mt-4">
-        <!-- To-Do Lists -->
-        <div class="col-md-8">
-            <div class="card">
-                <div class="card-header bg-dark text-white">
-                    <h5 class="mb-0">To-Do Lists</h5>
-                </div>
-                <div class="card-body">
-                    <ul class="nav nav-tabs" id="taskTabs" role="tablist">
-                        @*
-                        @foreach (var category in Model.TodoCategories.Select((cat, i) => new { cat, i }))
-                        {
-                            <li class="nav-item" role="presentation">
-                                <button class="nav-link @(category.i == 0 ? "active" : "")"
-                                        id="@category.cat.Name-tab"
-                                        data-bs-toggle="tab"
-                                        data-bs-target="#@category.cat.Name"
-                                        type="button"
-                                        role="tab"
-                                        aria-controls="@category.cat.Name"
-                                        aria-selected="@(category.i == 0 ? "true" : "false")">
-                                    @category.cat.Name
-                                </button>
-                            </li>
-                        }*@
-                    </ul>
-                    <div class="tab-content p-3" id="taskTabsContent">
-                    @*
+    
 
-                        @foreach (var category in Model.TodoCategories.Select((cat, i) => new { cat, i }))
-                        {
-                            <div class="tab-pane fade @(category.i == 0 ? "show active" : "")"
-                                 id="@category.cat.Name"
-                                 role="tabpanel"
-                                 aria-labelledby="@category.cat.Name-tab">
-
-                                <div class="mb-3">
-                                    <form asp-action="AddTodo" method="post" class="row g-3">
-                                        <input type="hidden" name="TodoCategoryId" value="@category.cat.Id" />
-                                        <div class="col-md-5">
-                                            <input type="text" class="form-control" name="Description" placeholder="New task" required />
-                                        </div>
-                                        <div class="col-md-3">
-                                            <input type="date" class="form-control" name="DueDate" required />
-                                        </div>
-                                        <div class="col-md-2">
-                                            <input type="text" class="form-control" name="AssignedTo" placeholder="Assigned to" />
-                                        </div>
-                                        <div class="col-md-2">
-                                            <button type="submit" class="btn btn-primary w-100">Add</button>
-                                        </div>
-                                    </form>
-                                </div>
-
-                                <ul class="list-group">
-                                    @foreach (var task in category.cat.Items.OrderBy(t => t.DueDate))
-                                    {
-                                        <li class="list-group-item d-flex justify-content-between align-items-center @(task.IsCompleted ? "list-group-item-success" : (task.DueDate < DateTime.Today ? "list-group-item-danger" : ""))">
-                                            <div class="d-flex align-items-center">
-                                                <form asp-action="CompleteTodo" method="post" class="me-2">
-                                                    <input type="hidden" name="id" value="@task.Id" />
-                                                    <input type="checkbox" class="form-check-input"
-                                                    @(task.IsCompleted ? "checked" : "")
-                                                           onChange="this.form.submit()" />
-                                                </form>
-                                                <div>
-                                                    <span class="@(task.IsCompleted ? "text-decoration-line-through" : "")">@task.Description</span>
-                                                    @if (!string.IsNullOrEmpty(task.AssignedTo))
-                                                    {
-                                                        <span class="badge bg-secondary ms-2">@task.AssignedTo</span>
-                                                    }
-                                                </div>
-                                            </div>
-                                            <span class="badge @(task.DueDate < DateTime.Today ? "bg-danger" : "bg-primary") rounded-pill">
-                                                @task.DueDate.ToString("MMM d")
-                                            </span>
-                                        </li>
-                                    }
-                                </ul>
-                            </div>
-                        }*@
-                    </div>
-
-
-                </div>
+    <!-- Wedding Timeline -->
+    <div class="col-md-6">
+        <div class="card">
+            <div class="card-header bg-warning text-dark">
+                <h5 class="mb-0">Wedding Timeline</h5>
             </div>
-        </div>
-
-        <!-- Budget Details -->
-        <div class="col-md-4">
-            <div class="card">
-                <div class="card-header bg-warning text-dark">
-                    <h5 class="mb-0">Budget Details</h5>
-                </div>
-                <div class="card-body">
-                    <div class="table-responsive">
-                        <table class="table table-sm">
-                            <thead>
-                                <tr>
-                                    <th>Category</th>
-                                    <th>Estimated</th>
-                                    <th>Actual</th>
-                                    <th>Status</th>
-                                </tr>
-                            </thead>
-                            @*
-                            <tbody>
-                                @foreach (var category in Model.BudgetItems
-                                .GroupBy(b => b.Category)
-                                .Select(g => new
-                                {
-                                   Category = g.Key,
-                                   Estimated = g.Sum(b => b.EstimatedCost),
-                                   Actual = g.Sum(b => b.ActualCost),
-                                   PaidItems = g.Count(b => b.IsPaid),
-                                   TotalItems = g.Count()
-                                }))
+            <div class="card-body">
+                <div class="table-responsive">
+                    <table class="table table-sm">
+                        <thead>
+                            <tr>
+                                <th>Event</th>
+                                <th>Date & Time</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @if (Model.Timelines != null && Model.Timelines.Any(x => !x.IsDeleted))
+                            {
+                                @foreach (var timeline in Model.Timelines.Where(x => !x.IsDeleted).OrderBy(x => x.EventTime).Take(5))
                                 {
                                     <tr>
-                                        <td>@category.Category</td>
-                                        <td>$@category.Estimated.ToString("#,##0")</td>
-                                        <td>$@category.Actual.ToString("#,##0")</td>
                                         <td>
-                                            <div class="progress" style="height: 5px;">
-                                                <div class="progress-bar @(category.Actual > category.Estimated ? "bg-danger" : "bg-success")"
-                                                     role="progressbar"
-                                                     style="width: @(category.Estimated > 0 ? Math.Min(100, (category.Actual / category.Estimated) * 100) : 0)%"
-                                                     aria-valuenow="@category.Actual"
-                                                     aria-valuemin="0"
-                                                     aria-valuemax="@category.Estimated">
-                                                </div>
-                                            </div>
-                                            <small>@category.PaidItems of @category.TotalItems paid</small>
+                                            <strong>@timeline.EventName</strong>
+                                            <small class="d-block text-muted">@timeline.EventDescription</small>
+                                        </td>
+                                        <td>@timeline.EventTime.ToString("MMM d, yyyy h:mm tt")</td>
+                                    </tr>
+                                }
+                            }
+                            else
+                            {
+                                <tr>
+                                    <td colspan="2" class="text-center">No timeline events added yet.</td>
+                                </tr>
+                            }
+                        </tbody>
+                    </table>
+                </div>
+                <button type="button" class="btn btn-sm btn-outline-warning mt-3" data-bs-toggle="modal" data-bs-target="#timelineModal">
+                    Manage Timeline
+                </button>
+            </div>
+        </div>
+    </div>
+
+<!--Modals-->
+
+<!-- Add Task Modal -->
+<div class="modal fade" id="addTaskModal" tabindex="-1" aria-labelledby="addTaskModalLabel" aria-hidden="true">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header bg-info text-white">
+        <h5 class="modal-title" id="addTaskModalLabel">Add New Task</h5>
+        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+            <form asp-controller="Dashboard" asp-action="AddChecklist" method="post">
+        <div class="modal-body">
+          <input type="hidden" class="form-control" id="taskStatus" name="TaskStatus" value="Pending">
+          <input type="hidden" class="form-control" id="coupleId" name="CoupleId" value="@Model.Id">
+          
+
+          <div class="mb-3">
+            <label for="taskName" class="form-label">Task Name</label>
+            <input type="text" class="form-control" id="taskName" name="TaskName" required>
+          </div>         
+          <div class="mb-3">
+             <label for="taskDescription" class="form-label">Description</label>
+             <input type="text" class="form-control" id="taskDescription" name="TaskDescription" required>
+          </div>
+          <div class="mb-3">
+            <label for="dueDate" class="form-label">Due Date</label>
+            <input type="date" class="form-control" id="dueDate" name="DueDate" required>
+          </div>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+          <button type="submit" class="btn btn-info">Add Task</button>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>
+
+<!-- Edit Task Modal -->
+<div class="modal fade" id="editTaskModal" tabindex="-1" aria-labelledby="editTaskModalLabel" aria-hidden="true">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header bg-primary text-white">
+        <h5 class="modal-title" id="editTaskModalLabel">Edit Task</h5>
+        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+        <form asp-controller="Dashboard" asp-action="UpdateChecklist" method="post">
+        <div class="modal-body">
+          <input type="hidden" id="editTaskId" name="Id">
+          <div class="mb-3">
+            <label for="editTaskName" class="form-label">Task Name</label>
+            <input type="text" class="form-control" id="editTaskName" name="TaskName" required>
+          </div>
+          <div class="mb-3">
+            <label for="editDueDate" class="form-label">Due Date</label>
+            <input type="date" class="form-control" id="editDueDate" name="DueDate" required>
+          </div>
+                    <div class="mb-3 form-check">
+                        <input type="checkbox" class="form-check-input" id="editIsCompleted" name="IsCompleted" value="true">
+                        <label class="form-check-label" for="editIsCompleted">Mark as Completed</label>
+                    </div>
+                    <!-- Move this below the checkbox -->
+                    <input type="hidden" name="IsCompleted" value="false" />
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+          <button type="submit" class="btn btn-primary">Save Changes</button>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>
+
+<!-- Delete Task Modal -->
+<div class="modal fade" id="deleteTaskModal" tabindex="-1" aria-labelledby="deleteTaskModalLabel" aria-hidden="true">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header bg-danger text-white">
+        <h5 class="modal-title" id="deleteTaskModalLabel">Delete Task</h5>
+        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+            <form asp-controller="Dashboard" asp-action="DeleteChecklist" method="post">
+        <div class="modal-body">
+          <input type="hidden" id="deleteTaskId" name="Id">
+          <p>Are you sure you want to delete the task "<span id="deleteTaskName"></span>"?</p>
+          <p class="text-danger">This action cannot be undone.</p>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+          <button type="submit" class="btn btn-danger">Delete</button>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>
+
+<!--Task inprog modal-->
+<div class="modal fade" id="tasksModal" tabindex="-1" aria-labelledby="todoModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header bg-info text-white">
+                <h5 class="modal-title" id="todoModalLabel">All To-Do Items</h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <div class="table-responsive">
+                    <table class="table table-hover">
+                        <thead>
+                            <tr>
+                                <th>Completed</th>
+                                <th>Task</th>
+                                <th>Due Date</th>
+                                <th>Days Left</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @foreach (var checklist in Model.Checklists.OrderBy(d => d.IsCompleted).ThenBy(d => d.DueDate))
+                            {
+                                <tr class="@(checklist.IsCompleted ? "table-success" : (checklist.DueDate < DateTime.Today ? "table-danger" : ""))">
+                                    <td>
+                                        <div class="form-check">
+                                            <input class="form-check-input task-checkbox"
+                                                   type="checkbox"
+                                                   id="task-@checklist.Id"
+                                                   data-task-id="@checklist.Id"
+                                            @(checklist.IsCompleted ? "checked" : "")>
+                                        </div>
+                                    </td>
+                                    <td>
+                                        <span class="@(checklist.IsCompleted ? "text-decoration-line-through" : "")">@checklist.TaskName</span>
+                                    </td>
+                                    <td>@checklist.DueDate.ToString("MMM d, yyyy")</td>
+                                    <td>
+                                        <span class="badge @(checklist.IsCompleted ? "bg-success" : (checklist.DueDate < DateTime.Today ? "bg-danger" : "bg-primary")) rounded-pill">
+                                            @((checklist.DueDate - DateTime.Today).Days) days
+                                        </span>
+                                    </td>
+                                    <td>
+                                        <button class="btn btn-sm btn-outline-primary edit-task-btn"
+                                                data-bs-toggle="modal"
+                                                data-bs-target="#editTaskModal"
+                                                data-id="@checklist.Id"
+                                                data-task="@checklist.TaskName"
+                                                data-due-date="@checklist.DueDate.ToString("yyyy-MM-dd")"
+                                                data-is-completed="@checklist.IsCompleted.ToString().ToLower()">
+                                            <i class="bi bi-pencil"></i> Edit
+                                        </button>
+                                        <button class="btn btn-sm btn-outline-danger delete-task-btn"
+                                                data-bs-toggle="modal"
+                                                data-bs-target="#deleteTaskModal"
+                                                data-id="@checklist.Id"
+                                                data-task="@checklist.TaskName">
+                                            <i class="bi bi-trash"></i> Delete
+                                        </button>
+                                    </td>
+                                </tr>
+                            }
+                        </tbody>
+                    </table>
+                </div>
+
+                <div class="d-flex justify-content-between align-items-center mt-3">
+                    <button type="button" class="btn btn-info" data-bs-toggle="modal" data-bs-target="#addTaskModal">
+                        Add New Task
+                    </button>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!--ToDo list modal-->
+<div class="modal fade" id="todoModal" tabindex="-1" aria-labelledby="todoModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header bg-info text-white">
+                <h5 class="modal-title" id="todoModalLabel">All To-Do Items</h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <div class="table-responsive">
+                    <table class="table table-hover">
+                        <thead>
+                            <tr>
+                                <th>Status</th>
+                                <th>Task</th>
+                                <th>Due Date</th>
+                                <th>Days Left</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @foreach (var checklist in Model.Checklists.OrderBy(d => d.IsCompleted).ThenBy(d => d.DueDate))
+                            {
+                                <tr class="@(checklist.IsCompleted ? "table-success" : (checklist.DueDate < DateTime.Today ? "table-danger" : ""))">
+                                    <td>
+                                        <div class="form-check">
+                                            <input class="form-check-input task-checkbox"
+                                                   type="checkbox"
+                                                   id="task-@checklist.Id"
+                                                   data-task-id="@checklist.Id"
+                                            @(checklist.IsCompleted ? "checked" : "")>
+                                        </div>
+                                    </td>
+                                    <td>
+                                        <span class="@(checklist.IsCompleted ? "text-decoration-line-through" : "")">@checklist.TaskName</span>
+                                    </td>
+                                    <td>@checklist.DueDate.ToString("MMM d, yyyy")</td>
+                                    <td>
+                                        <span class="badge @(checklist.IsCompleted ? "bg-success" : (checklist.DueDate < DateTime.Today ? "bg-danger" : "bg-primary")) rounded-pill">
+                                            @((checklist.DueDate - DateTime.Today).Days) days
+                                        </span>
+                                    </td>
+                                </tr>
+                            }
+                        </tbody>
+                    </table>
+                </div>
+
+                <div class="d-flex justify-content-between align-items-center mt-3">
+                    <div>
+                        <span class="badge bg-danger me-2"></span> Overdue
+                        <span class="badge bg-primary mx-2"></span> Upcoming
+                        <span class="badge bg-success mx-2"></span> Completed
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+    <!-- Budget Management Modal -->
+    <div class="modal fade" id="budgetModal" tabindex="-1" aria-labelledby="budgetModalLabel" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header bg-primary text-white">
+                    <h5 class="modal-title" id="budgetModalLabel">Manage Budget</h5>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <form asp-controller="Dashboard" asp-action="UpdateBudjet" method="post">
+                    <div class="modal-body">
+                        <input type="hidden" id="modifyBudgjetId" name="Id" value="@Model.Budgets.Id">
+
+                        <div class="mb-3">
+                            <label for="allocatedAmount" class="form-label">Total Budget ($)</label>
+                            <input type="number" class="form-control" id="allocatedAmount" name="AllocatedAmount"
+                                   value="@Model.Budgets.AllocatedAmount" step="0.01" min="0" required>
+                            <small class="text-muted">Current budget: $@Model.Budgets.AllocatedAmount.ToString("#,##0.00")</small>
+                        </div>
+
+                        <div class="budget-summary mt-4">
+                            <h6>Budget Summary</h6>
+                            <div class="d-flex justify-content-between">
+                                <span>Total Budget:</span>
+                                <span>$@Model.Budgets.AllocatedAmount.ToString("#,##0.00")</span>
+                            </div>
+                            <div class="d-flex justify-content-between">
+                                <span>Spent Amount:</span>
+                                <span>$@Model.Budgets.SpentAmount.ToString("#,##0.00")</span>
+                            </div>
+                            <div class="d-flex justify-content-between font-weight-bold">
+                                <span>Remaining:</span>
+                                <span>$@((Model.Budgets.AllocatedAmount - Model.Budgets.SpentAmount).ToString("#,##0.00"))</span>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                        <button type="submit" class="btn btn-primary">Save Changes</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- Add Timeline Modal -->
+    <div class="modal fade" id="addTimelineModal" tabindex="-1" aria-labelledby="addTimelineModalLabel" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header bg-warning text-dark">
+                    <h5 class="modal-title" id="addTimelineModalLabel">Add Timeline Event</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+            <form asp-controller="Dashboard" asp-action="AddTimeline" method="post">
+                    <div class="modal-body">
+                    <input type="hidden" class="form-control" id="coupleId" name="CoupleId" value="@Model.Id" required>
+
+                        <div class="mb-3">
+                            <label for="eventName" class="form-label">Event Name</label>
+                            <input type="text" class="form-control" id="eventName" name="EventName" required>
+                        </div>
+                        <div class="mb-3">
+                            <label for="eventTime" class="form-label">Event Date & Time</label>
+                            <input type="datetime-local" class="form-control" id="eventTime" name="EventTime" required>
+                        </div>
+                        <div class="mb-3">
+                            <label for="eventDescription" class="form-label">Description</label>
+                            <textarea class="form-control" id="eventDescription" name="EventDescription" rows="3"></textarea>
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                        <button type="submit" class="btn btn-warning">Add Event</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- Edit Timeline Modal -->
+    <div class="modal fade" id="editTimelineModal" tabindex="-1" aria-labelledby="editTimelineModalLabel" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header bg-primary text-white">
+                    <h5 class="modal-title" id="editTimelineModalLabel">Edit Timeline Event</h5>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <form asp-controller="Dashboard" asp-action="UpdateTimeline" method="post">
+                    <div class="modal-body">
+                        <input type="hidden" id="editTimelineId" name="Id">
+                        <div class="mb-3">
+                            <label for="editEventName" class="form-label">Event Name</label>
+                            <input type="text" class="form-control" id="editEventName" name="EventName" required>
+                        </div>
+                        <div class="mb-3">
+                            <label for="editEventTime" class="form-label">Event Date & Time</label>
+                            <input type="datetime-local" class="form-control" id="editEventTime" name="EventTime" required>
+                        </div>
+                        <div class="mb-3">
+                            <label for="editEventDescription" class="form-label">Description</label>
+                            <textarea class="form-control" id="editEventDescription" name="EventDescription" rows="3"></textarea>
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                        <button type="submit" class="btn btn-primary">Save Changes</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- Timeline Management Modal -->
+    <div class="modal fade" id="timelineModal" tabindex="-1" aria-labelledby="timelineModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-lg">
+            <div class="modal-content">
+                <div class="modal-header bg-warning text-dark">
+                    <h5 class="modal-title" id="timelineModalLabel">Wedding Timeline Events</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <div class="table-responsive">
+                        <table class="table table-hover">
+                            <thead>
+                                <tr>
+                                    <th>Event</th>
+                                    <th>Date & Time</th>
+                                    <th>Description</th>
+                                    <th>Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                @foreach (var timeline in Model.Timelines.Where(x => !x.IsDeleted).OrderBy(x => x.EventTime))
+                                {
+                                    <tr>
+                                        <td>
+                                            <strong>@timeline.EventName</strong>
+                                        </td>
+                                        <td>@timeline.EventTime.ToString("MMM d, yyyy h:mm tt")</td>
+                                        <td>@timeline.EventDescription</td>
+                                        <td>
+                                            <button class="btn btn-sm btn-outline-primary edit-timeline-btn"
+                                                    data-bs-toggle="modal"
+                                                    data-bs-target="#editTimelineModal"
+                                                    data-id="@timeline.Id"
+                                                    data-event="@timeline.EventName"
+                                                    data-time="@timeline.EventTime.ToString("yyyy-MM-ddTHH:mm")"
+                                                    data-description="@timeline.EventDescription">
+                                                <i class="bi bi-pencil"></i> Edit
+                                            </button>
+                                            <button class="btn btn-sm btn-outline-danger delete-timeline-btn"
+                                                    data-bs-toggle="modal"
+                                                    data-bs-target="#deleteTimelineModal"
+                                                    data-id="@timeline.Id"
+                                                    data-event="@timeline.EventName">
+                                                <i class="bi bi-trash"></i> Delete
+                                            </button>
                                         </td>
                                     </tr>
                                 }
                             </tbody>
-                            *@
                         </table>
                     </div>
+
+                    <div class="d-flex justify-content-between align-items-center mt-3">
+                        <button type="button" class="btn btn-warning" data-bs-toggle="modal" data-bs-target="#addTimelineModal">
+                            Add New Event
+                        </button>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
                 </div>
             </div>
         </div>
     </div>
-</div>
 
-@* Modals *@
-@* Tasks Modal *@
-<div class="modal fade" id="tasksModal" tabindex="-1" aria-labelledby="tasksModalLabel" aria-hidden="true">
-    <div class="modal-dialog modal-lg">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h5 class="modal-title" id="tasksModalLabel">Manage Tasks</h5>
-                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-            </div>
-            <div class="modal-body">
-                <!-- Tabs for each category -->
-                <ul class="nav nav-pills mb-3" id="modalTaskTabs" role="tablist">
-                @*
-                    @foreach (var category in Model.TodoCategories.Select((cat, i) => new { cat, i }))
-                    {
-                        <li class="nav-item" role="presentation">
-                            <button class="nav-link @(category.i == 0 ? "active" : "")"
-                                    id="modal-@category.cat.Name-tab"
-                                    data-bs-toggle="tab"
-                                    data-bs-target="#modal-@category.cat.Name"
-                                    type="button"
-                                    role="tab"
-                                    aria-controls="modal-@category.cat.Name"
-                                    aria-selected="@(category.i == 0 ? "true" : "false")">
-                                @category.cat.Name
-                            </button>
-                        </li>
-                    }
-                *@
-                </ul>
-                <div class="tab-content" id="modalTaskTabsContent">
-                @*
-                    @foreach (var category in Model.TodoCategories.Select((cat, i) => new { cat, i }))
-                    {
-                        <div class="tab-pane fade @(category.i == 0 ? "show active" : "")"
-                             id="modal-@category.cat.Name"
-                             role="tabpanel"
-                             aria-labelledby="modal-@category.cat.Name-tab">
-
-                            <div class="mb-3">
-                                <form asp-action="AddTodo" method="post" class="row g-3">
-                                    <input type="hidden" name="TodoCategoryId" value="@category.cat.Id" />
-                                    <div class="col-md-5">
-                                        <input type="text" class="form-control" name="Description" placeholder="New task" required />
-                                    </div>
-                                    <div class="col-md-3">
-                                        <input type="date" class="form-control" name="DueDate" required />
-                                    </div>
-                                    <div class="col-md-2">
-                                        <input type="text" class="form-control" name="AssignedTo" placeholder="Assigned to" />
-                                    </div>
-                                    <div class="col-md-2">
-                                        <button type="submit" class="btn btn-primary w-100">Add</button>
-                                    </div>
-                                </form>
-                            </div>
-
-                            <table class="table">
-                                <thead>
-                                    <tr>
-                                        <th>Task</th>
-                                        <th>Due Date</th>
-                                        <th>Assigned To</th>
-                                        <th>Status</th>
-                                        <th>Actions</th>
-                                    </tr>
-                                </thead>
-                                <tbody>
-                                    @foreach (var task in category.cat.Items.OrderBy(t => t.DueDate))
-                                    {
-                                        <tr class="@(task.IsCompleted ? "table-success" : (task.DueDate < DateTime.Today ? "table-danger" : ""))">
-                                            <td>@task.Description</td>
-                                            <td>@task.DueDate.ToString("MMM d, yyyy")</td>
-                                            <td>@(string.IsNullOrEmpty(task.AssignedTo) ? "-" : task.AssignedTo)</td>
-                                            <td>@(task.IsCompleted ? "Complete" : "Pending")</td>
-                                            <td>
-                                                <form asp-action="CompleteTodo" method="post" class="d-inline">
-                                                    <input type="hidden" name="id" value="@task.Id" />
-                                                    <button type="submit" class="btn btn-sm btn-success">Complete</button>
-                                                </form>
-                                                <!-- Add edit/delete buttons as needed -->
-                                            </td>
-                                        </tr>
-                                    }
-                                </tbody>
-                            </table>
-                        </div>
-                    }
-                *@
-                </div>
-            </div>
-            <div class="modal-footer">
-                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
-            </div>
-        </div>
-    </div>
-</div>
-
-@* Budget Modal *@
-<div class="modal fade" id="budgetModal" tabindex="-1" aria-labelledby="budgetModalLabel" aria-hidden="true">
-    <div class="modal-dialog modal-lg">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h5 class="modal-title" id="budgetModalLabel">Manage Budget</h5>
-                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-            </div>
-            <div class="modal-body">
-                <div class="mb-3">
-                    <form asp-action="UpdateTotalBudget" method="post" class="row g-3 mb-4">
-                        <input type="hidden" name="dashboardId" value="@Model.Id" />
-                        <div class="col-md-8">
-                            <label class="form-label">Total Wedding Budget</label>
-                            <input type="number" class="form-control" name="totalBudget" value="@Model.Budgets.AllocatedAmount" min="0" step="0.01" />
-                        </div>
-                        <div class="col-md-4 d-flex align-items-end">
-                            <button type="submit" class="btn btn-primary">Update Total Budget</button>
-                        </div>
-                    </form>
-
-                    <hr />
-
-                    <form asp-action="AddBudgetItem" method="post" class="row g-3">
-                        <input type="hidden" name="WeddingDashboardId" value="@Model.Id" />
-                        <div class="col-md-3">
-                            <input type="text" class="form-control" name="Category" placeholder="Category" required />
-                        </div>
-                        <div class="col-md-3">
-                            <input type="text" class="form-control" name="Description" placeholder="Description" required />
-                        </div>
-                        <div class="col-md-2">
-                            <input type="number" class="form-control" name="EstimatedCost" placeholder="Est. Cost" required />
-                        </div>
-                        <div class="col-md-2">
-                            <input type="number" class="form-control" name="ActualCost" placeholder="Actual Cost" value="0" />
-                        </div>
-                        <div class="col-md-2">
-                            <button type="submit" class="btn btn-primary w-100">Add</button>
-                        </div>
-                    </form>
-                </div>
-
-                <table class="table">
-                    <thead>
-                        <tr>
-                            <th>Category</th>
-                            <th>Description</th>
-                            <th>Est. Cost</th>
-                            <th>Actual Cost</th>
-                            <th>Status</th>
-                            <th>Actions</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                    @*
-                        @foreach (var item in Model.BudgetItems.OrderBy(b => b.Category))
-                        {
-                            <tr>
-                                <td>@item.Category</td>
-                                <td>@item.Description</td>
-                                <td>$@item.EstimatedCost.ToString("#,##0.00")</td>
-                                <td>$@item.ActualCost.ToString("#,##0.00")</td>
-                                <td>
-                                    <span class="badge @(item.IsPaid ? "bg-success" : "bg-warning")">
-                                        @(item.IsPaid ? "Paid" : "Unpaid")
-                                    </span>
-                                </td>
-                                <td>
-                                    <button type="button" class="btn btn-sm btn-primary" data-bs-toggle="modal" data-bs-target="#editBudgetItem@(item.Id)">
-                                        Edit
-                                    </button>
-                                </td>
-                            </tr>
-                        }
-                    *@
-                    </tbody>
-                </table>
-            </div>
-            <div class="modal-footer">
-                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
-            </div>
-        </div>
-    </div>
-</div>
-
-@* Dates Modal *@
-<div class="modal fade" id="datesModal" tabindex="-1" aria-labelledby="datesModalLabel" aria-hidden="true">
-    <div class="modal-dialog modal-lg">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h5 class="modal-title" id="datesModalLabel">Important Dates</h5>
-                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-            </div>
-            <div class="modal-body">
-                <div class="mb-3">
-                    <form asp-action="AddImportantDate" method="post" class="row g-3">
-                        <input type="hidden" name="WeddingDashboardId" value="@Model.Id" />
-                        <div class="col-md-4">
-                            <input type="text" class="form-control" name="Title" placeholder="Title" required />
-                        </div>
-                        <div class="col-md-4">
-                            <input type="text" class="form-control" name="Description" placeholder="Description" />
-                        </div>
-                        <div class="col-md-2">
-                            <input type="date" class="form-control" name="Date" required />
-                        </div>
-                        <div class="col-md-2">
-                            <button type="submit" class="btn btn-primary w-100">Add</button>
-                        </div>
-                    </form>
-                </div>
-
-                <table class="table">
-                    <thead>
-                        <tr>
-                            <th>Date</th>
-                            <th>Title</th>
-                            <th>Description</th>
-                            <th>Status</th>
-                            <th>Days Left</th>
-                            <th>Actions</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        @foreach (var date in Model.Checklists.OrderBy(d => d.DueDate))
-                        {
-                            <tr class="@(date.IsCompleted ? "table-success" : (date.DueDate < DateTime.Today ? "table-danger" : ""))">
-                                <td>@date.DueDate.ToString("MMM d, yyyy")</td>
-                                <td>@date.TaskName</td>
-                                <td>@date.TaskDescription</td>
-                                <td>@(date.IsCompleted ? "Complete" : "Pending")</td>
-                                <td>@((date.DueDate - DateTime.Today).Days) days</td>
-                                <td>
-                                    <form asp-action="CompleteImportantDate" method="post" class="d-inline">
-                                        <input type="hidden" name="id" value="@date.Id" />
-                                        <button type="submit" class="btn btn-sm btn-success">Mark Complete</button>
-                                    </form>
-                                </td>
-                            </tr>
-                        }
-                    </tbody>
-                </table>
-            </div>
-            <div class="modal-footer">
-                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
-            </div>
-        </div>
-    </div>
-</div>
-
-@* Edit Budget Item Modals (one for each item) 
-@foreach (var item in Model.BudgetItems)
-{
-    <div class="modal fade" id="editBudgetItem@(item.Id)" tabindex="-1" aria-hidden="true">
+    <!-- Add Timeline Modal -->
+    <div class="modal fade" id="addTimelineModal" tabindex="-1" aria-labelledby="addTimelineModalLabel" aria-hidden="true">
         <div class="modal-dialog">
             <div class="modal-content">
-                <div class="modal-header">
-                    <h5 class="modal-title">Edit Budget Item</h5>
+                <div class="modal-header bg-warning text-dark">
+                    <h5 class="modal-title" id="addTimelineModalLabel">Add New Timeline Event</h5>
                     <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                 </div>
-                <div class="modal-body">
-                    <form asp-action="UpdateBudgetItem" method="post">
-                        <input type="hidden" name="Id" value="@item.Id" />
-                        <input type="hidden" name="WeddingDashboardId" value="@Model.Id" />
+                <form asp-controller="Dashboard" asp-action="AddTimeline" method="post">
+                    <div class="modal-body">
+                        <input type="hidden" class="form-control" id="coupleId" name="CoupleId" value="@Model.Id">
 
                         <div class="mb-3">
-                            <label class="form-label">Category</label>
-                            <input type="text" class="form-control" name="Category" value="@item.Category" required />
+                            <label for="eventName" class="form-label">Event Name</label>
+                            <input type="text" class="form-control" id="eventName" name="EventName" required>
                         </div>
-
                         <div class="mb-3">
-                            <label class="form-label">Description</label>
-                            <input type="text" class="form-control" name="Description" value="@item.Description" required />
+                            <label for="eventTime" class="form-label">Date & Time</label>
+                            <input type="datetime-local" class="form-control" id="eventTime" name="EventTime" required>
                         </div>
-
                         <div class="mb-3">
-                            <label class="form-label">Estimated Cost</label>
-                            <input type="number" class="form-control" name="EstimatedCost" value="@item.EstimatedCost" required />
+                            <label for="eventDescription" class="form-label">Description</label>
+                            <textarea class="form-control" id="eventDescription" name="EventDescription" rows="3"></textarea>
                         </div>
-
-                        <div class="mb-3">
-                            <label class="form-label">Actual Cost</label>
-                            <input type="number" class="form-control" name="ActualCost" value="@item.ActualCost" />
-                        </div>
-
-                        <div class="mb-3 form-check">
-                            <input type="checkbox" class="form-check-input" id="isPaid@(item.Id)" name="IsPaid" @(item.IsPaid ? "checked" : "") />
-                            <label class="form-check-label" for="isPaid@(item.Id)">Paid</label>
-                        </div>
-
-                        <div class="mb-3">
-                            <label class="form-label">Payment Date</label>
-                            <input type="date" class="form-control" name="PaymentDate" value="@(item.PaymentDate?.ToString("yyyy-MM-dd"))" />
-                        </div>
-
-                        <div class="text-end">
-                            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
-                            <button type="submit" class="btn btn-primary">Save Changes</button>
-                        </div>
-                    </form>
-                </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                        <button type="submit" class="btn btn-warning">Add Event</button>
+                    </div>
+                </form>
             </div>
         </div>
-    </div>*@
+    </div>
+
+    <!-- Edit Timeline Modal -->
+    <div class="modal fade" id="editTimelineModal" tabindex="-1" aria-labelledby="editTimelineModalLabel" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header bg-primary text-white">
+                    <h5 class="modal-title" id="editTimelineModalLabel">Edit Timeline Event</h5>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <form asp-controller="Dashboard" asp-action="UpdateTimeline" method="post">
+                    <div class="modal-body">
+                        <input type="hidden" id="editTimelineId" name="Id">
+
+                        <div class="mb-3">
+                            <label for="editEventName" class="form-label">Event Name</label>
+                            <input type="text" class="form-control" id="editEventName" name="EventName" required>
+                        </div>
+                        <div class="mb-3">
+                            <label for="editEventTime" class="form-label">Date & Time</label>
+                            <input type="datetime-local" class="form-control" id="editEventTime" name="EventTime" required>
+                        </div>
+                        <div class="mb-3">
+                            <label for="editEventDescription" class="form-label">Description</label>
+                            <textarea class="form-control" id="editEventDescription" name="EventDescription" rows="3"></textarea>
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                        <button type="submit" class="btn btn-primary">Save Changes</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- Delete Timeline Modal -->
+    <div class="modal fade" id="deleteTimelineModal" tabindex="-1" aria-labelledby="deleteTimelineModalLabel" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header bg-danger text-white">
+                    <h5 class="modal-title" id="deleteTimelineModalLabel">Delete Timeline Event</h5>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <form asp-controller="Dashboard" asp-action="DeleteTimeline" method="post">
+                    <div class="modal-body">
+                        <input type="hidden" id="deleteTimelineId" name="Id">
+                        <p>Are you sure you want to delete the event "<span id="deleteTimelineEvent"></span>"?</p>
+                        <p class="text-danger">This action cannot be undone.</p>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                        <button type="submit" class="btn btn-danger">Delete</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+
+@section Scripts {
+    <script>
+            //Budgjet detail modal
+
+            document.querySelectorAll('.edit-budget-btn').forEach(button => {
+                button.addEventListener('click', function() {
+                    const id = this.dataset.id;
+                    const amount = this.dataset.amount;
+
+                    document.getElementById('modifyBudgjetId').value = id;
+                    document.getElementById('allocatedAmount').value = parseFloat(amount).toFixed(2);
+                });
+            });
+
+
+        //Task inprog > delete modal
+        document.addEventListener("DOMContentLoaded", function() {
+            const deleteButtons = document.querySelectorAll(".delete-task-btn");
+
+            deleteButtons.forEach(button => {
+                button.addEventListener("click", function() {
+                    const taskId = this.dataset.id;
+                    const taskName = this.dataset.task;
+
+                    document.getElementById("deleteTaskId").value = taskId;
+                    document.getElementById("deleteTaskName").textContent = taskName;
+                });
+            });
+        });
+
+        //Task inprog > edit modal
+        document.addEventListener("DOMContentLoaded", function() {
+            const editButtons = document.querySelectorAll(".edit-task-btn");
+
+            editButtons.forEach(button => {
+                button.addEventListener("click", function() {
+                    const taskId = this.dataset.id;
+                    const taskName = this.dataset.task;
+                    const dueDate = this.dataset.dueDate;
+                    const isCompleted = this.dataset.isCompleted === "true";
+                    console.log("isCompleted parsed:", isCompleted);
+                    // Populate modal fields
+                    document.getElementById("editTaskId").value = taskId;
+                    document.getElementById("editTaskName").value = taskName;
+                    document.getElementById("editDueDate").value = dueDate;
+                    document.getElementById("editIsCompleted").checked = isCompleted;
+                });
+            });
+        });
+
+        document.addEventListener('DOMContentLoaded', function() {
+            // Setup Edit Modal
+            var editTaskModal = document.getElementById('editTaskModal');
+            if (editTaskModal) {
+                editTaskModal.addEventListener('show.bs.modal', function(event) {
+                    var button = event.relatedTarget;
+                    var id = button.getAttribute('data-id');
+                    var task = button.getAttribute('data-task');
+                    var dueDate = button.getAttribute('data-due-date');
+                    var isCompleted = button.getAttribute('data-is-completed') === "true"; // convert to boolean
+
+                    var modal = this;
+                    modal.querySelector('#editTaskId').value = id;
+                    modal.querySelector('#editTaskName').value = task;
+                    modal.querySelector('#editDueDate').value = dueDate;
+                    modal.querySelector('#editIsCompleted').checked = isCompleted;
+                });
+            }
+
+            // Timeline > Delete Modal
+            var deleteTimelineModal = document.getElementById('deleteTimelineModal');
+            if (deleteTimelineModal) {
+                deleteTimelineModal.addEventListener('show.bs.modal', function(event) {
+                    var button = event.relatedTarget;
+                    var id = button.getAttribute('data-id');
+                    var event = button.getAttribute('data-event');
+
+                    var modal = this;
+                    modal.querySelector('#deleteTimelineId').value = id;
+                    modal.querySelector('#deleteEventName').textContent = event;
+                });
+            }
+        });
+
+            $(document).ready(function() {
+                // Handle edit timeline button click
+                $('.edit-timeline-btn').click(function() {
+                    var id = $(this).data('id');
+                    var eventName = $(this).data('event');
+                    var eventTime = $(this).data('time');
+                    var description = $(this).data('description');
+
+                    $('#editTimelineId').val(id);
+                    $('#editEventName').val(eventName);
+                    $('#editEventTime').val(eventTime);
+                    $('#editEventDescription').val(description);
+
+                    // Prevent timelineModal from closing
+                    $('#editTimelineModal').on('show.bs.modal', function(e) {
+                        e.stopPropagation();
+                    });
+                });
+
+                // Handle delete timeline button click
+                $('.delete-timeline-btn').click(function() {
+                    var id = $(this).data('id');
+                    var eventName = $(this).data('event');
+
+                    $('#deleteTimelineId').val(id);
+                    $('#deleteTimelineEvent').text(eventName);
+
+                    // Prevent timelineModal from closing
+                    $('#deleteTimelineModal').on('show.bs.modal', function(e) {
+                        e.stopPropagation();
+                    });
+                });
+
+                // When the add/edit/delete modals are hidden, refresh the page
+                $('#addTimelineModal, #editTimelineModal, #deleteTimelineModal').on('hidden.bs.modal', function() {
+                    if ($(this).data('bs.modal') && $(this).data('bs.modal').isShown === false) {
+                        // Only refresh if this modal was actually hidden, not if a child modal was opened
+                        if (!$('.modal:visible').length) {
+                            // location.reload();
+                        }
+                    }
+                });
+            });
+
+        // jQuery code to move modals to end of body
+        $(document).ready(function() {
+            // Move all modals to the end of the body
+            $('#budgetModal, #addTimelineModal, #editTimelineModal, #deleteTimelineModal, #todoModal, #tasksModal').appendTo('body');
+        });
+    </script>
 }

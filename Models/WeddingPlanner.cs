@@ -7,6 +7,6 @@
         public int CoupleId { get; set; }
         public DateTime AssignedDate { get; set; }
         public bool IsDeleted { get; set; }
-        public Couple Couple { get; set; }
+        public Couple? Couple { get; set; }
     }
 }

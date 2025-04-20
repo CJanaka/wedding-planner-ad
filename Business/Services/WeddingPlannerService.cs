@@ -48,15 +48,15 @@ namespace wedding_planer_ad.Business.Services
         }
 
 
-        public async Task<WeddingPlanner> CreateAsync(WeddingPlanner planner)
+        public async Task<bool> CreateAsync(WeddingPlanner planner)
         {
             planner.AssignedDate = DateTime.UtcNow;
             _context.weddingPlanner.Add(planner);
             await _context.SaveChangesAsync();
-            return planner;
+            return true;
         }
 
-        public async Task<WeddingPlanner> UpdateAsync(WeddingPlanner planner)
+        public async Task<bool> UpdateAsync(WeddingPlanner planner)
         {
             var existing = await _context.weddingPlanner.FindAsync(planner.Id);
 
@@ -74,7 +74,7 @@ namespace wedding_planer_ad.Business.Services
 
 
             await _context.SaveChangesAsync();
-            return existing;
+            return true;
         }
 
 
@@ -252,6 +252,7 @@ namespace wedding_planer_ad.Business.Services
         {
             checklist.AssignedTo = string.Empty;
             checklist.IsDeleted = false;
+            checklist.IsCompleted = false;
 
             _context.WeddingChecklist.Add(checklist);
             await _context.SaveChangesAsync();
@@ -368,8 +369,16 @@ namespace wedding_planer_ad.Business.Services
             return user;
         }
 
+        public async Task<WeddingPlanner> GetByUserId(string id)
+        {
+           return await _context.weddingPlanner
+            .FirstOrDefaultAsync(p => p.PlannerUserId == id);
+        }
 
-
-
+        public async Task<WeddingPlanner> GetByCoupleId(int id)
+        {
+            return await _context.weddingPlanner
+                .FirstOrDefaultAsync(p => p.CoupleId == id);
+        }
     }
 }

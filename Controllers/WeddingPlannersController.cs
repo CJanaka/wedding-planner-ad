@@ -7,6 +7,7 @@ using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using wedding_planer_ad.Models.DTO;
 using Microsoft.AspNetCore.Authorization;
+using System.Diagnostics;
 
 
 namespace wedding_planer_ad.Controllers
@@ -15,13 +16,16 @@ namespace wedding_planer_ad.Controllers
     public class WeddingPlannersController : Controller
     {
         private readonly IWeddingPlannerService _plannerService;
+        private readonly ICoupleDashboardService _coupleService;
         private readonly UserManager<ApplicationUser> _userManager;
 
         public WeddingPlannersController(
          IWeddingPlannerService plannerService,
+         ICoupleDashboardService coupleService,
          UserManager<ApplicationUser> userManager)
         {
             _plannerService = plannerService;
+            _coupleService = coupleService;
             _userManager = userManager;
         }
 

@@ -1,6 +1,9 @@
-﻿using Microsoft.EntityFrameworkCore;
+﻿using System.Diagnostics;
+using System.Numerics;
+using Microsoft.EntityFrameworkCore;
 using wedding_planer_ad.Business.Interfaces;
 using wedding_planer_ad.Data;
+using wedding_planer_ad.Exceptions;
 using wedding_planer_ad.Models;
 using wedding_planer_ad.Models.ViewModels;
 
@@ -25,6 +28,7 @@ namespace wedding_planer_ad.Business.Services
             return await _context.Couple
                 .Include(c => c.Budgets)
                 .Include(c => c.Checklists)
+                .Include(c => c.Timelines)
                 .FirstOrDefaultAsync(c => c.User.Id == id);
 
         }
@@ -131,8 +135,6 @@ namespace wedding_planer_ad.Business.Services
 
             try
             {
-                booking.Status = "Pending";
-                booking.PaymentStatus = "Not Paid";
                 booking.BookingDate = DateTime.Now;
                 booking.IsDeleted = false;
 
@@ -158,9 +160,106 @@ namespace wedding_planer_ad.Business.Services
             return await _context.Booking
                 .Include(b => b.Vendor)
                 .Include(b => b.Payments)
+                .Include(b => b.Vendor.Services)
                 .Where(b => b.CoupleId == couple.Id && !b.IsDeleted)
                 .OrderByDescending(b => b.BookingDate)
-                .ToListAsync();
+                .ToListAsync() ?? new List<Booking>(); ;
+        }
+
+        public async Task<Couple> CreateAsync(Couple couple)
+        {
+            couple.CreatedAt = DateTime.Now;
+            couple.UpdatedAt = DateTime.Now;
+            _context.Couple.Add(couple);
+            await _context.SaveChangesAsync();
+            return couple;
+        }
+
+        public async Task<Couple> UpdateAsync(Couple couple)
+        {
+            var existing = await _context.Couple.FindAsync(couple.Id);
+
+            if (existing == null || existing.IsDeleted)
+                throw new ResourceNotFoundException($"couple with id {couple.Id} not found.");
+
+            existing.UpdatedAt = DateTime.UtcNow;
+            existing.WeddingDate = couple.WeddingDate;
+            existing.Budget = couple.Budget;
+
+            await _context.SaveChangesAsync();
+            return existing;
+        }
+
+        public async Task<WeddingBudget> UpdateBudjetAsync(WeddingBudget WeddingBudget)
+        {
+            var existing = await _context.WeddingBudget.FindAsync(WeddingBudget.Id);
+            
+            if (existing.AllocatedAmount != WeddingBudget.AllocatedAmount) {
+            
+                existing.AllocatedAmount = WeddingBudget.AllocatedAmount;
+            }
+            existing.SpentAmount = WeddingBudget.SpentAmount;
+
+            await _context.SaveChangesAsync();
+            return existing;
+
+        }
+
+        public async Task<Couple> GetCoupleById(int id)
+        {
+            return await _context.Couple
+                .Include(c => c.Budgets)
+                .Include(c => c.Checklists)
+                .FirstOrDefaultAsync(c => c.Id == id);
+        }
+
+        public async Task<bool> UpdateBookingAsync(Booking booking)
+        {
+            var existing = await _context.Booking.FindAsync(booking.Id);
+
+            if (existing == null)
+            {
+                Debug.WriteLine("booking not found! id- "+ booking.Id);
+                return false;
+            }
+
+            try
+            {
+                if(booking.Reviews != null)
+                    existing.Reviews = booking.Reviews;
+
+                if(booking.Status != null)
+                    existing.Status = booking.Status;
+
+                if(existing.PaymentStatus != null)
+                    existing.PaymentStatus = booking.PaymentStatus;
+
+                if (existing.BookingDate != null)
+                    existing.BookingDate = booking.BookingDate;
+
+                existing.IsDeleted = booking.IsDeleted;
+
+                await _context.SaveChangesAsync();
+                return true;
+            }
+            catch
+            {
+                return false;
+            }
+        }
+
+        public async Task<WeddingBudget> GetBudgetsByIdAsync(int id)
+        {
+            return await _context.WeddingBudget
+                .FirstOrDefaultAsync(b => b.Id == id);
+        }
+
+        public async Task<WeddingBudget> CreateBudjetAsync(WeddingBudget weddingBudget)
+        {
+
+            _context.WeddingBudget.Add(weddingBudget);
+            await _context.SaveChangesAsync();
+            return weddingBudget;
         }
     }
 }

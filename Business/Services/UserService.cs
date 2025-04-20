@@ -24,6 +24,7 @@ namespace wedding_planer_ad.Business.Services
 
         public async Task<ApplicationUser> GetUserByIdAsync(string id)
         {
+
             return await _userManager.Users.FirstOrDefaultAsync(u => u.Id == id);
         }
 

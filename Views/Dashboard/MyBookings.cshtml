@@ -2,6 +2,8 @@
     For more information on enabling MVC for empty projects, visit https://go.microsoft.com/fwlink/?LinkID=397860
 *@
 @{
+    Layout = "~/Views/Dashboard/_WeddingPlannerLayout.cshtml";
+
 }
 
 @model IEnumerable<wedding_planer_ad.Models.Booking>
@@ -11,15 +13,21 @@
 
     @if (TempData["SuccessMessage"] != null)
     {
-        <div class="alert alert-success alert-dismissible fade show" role="alert">
+        <div class="alert alert-success">
             @TempData["SuccessMessage"]
-            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+        </div>
+    }
+
+    @if (TempData["ErrorMessage"] != null)
+    {
+        <div class="alert alert-danger">
+            @TempData["ErrorMessage"]
         </div>
     }
 
     <div class="row">
         <div class="col-md-12">
-            @if (Model.Any())
+            @if (Model != null && Model.Any())
             {
                 <div class="table-responsive">
                     <table class="table table-striped">
@@ -37,26 +45,21 @@
                         <tbody>
                             @foreach (var booking in Model)
                             {
-                                <tr>
+                                <tr id="booking-@booking.Id">
                                     <td>@booking.Vendor.Name</td>
-                                    <td>
-                                        @{
-                                            var service = booking.Vendor.Services.FirstOrDefault(s => s.Id == booking.ServiceId);
-                                            @(service?.ServiceName ?? "N/A")
-                                        }
-                                    </td>
+                                    <td>@booking.ServiceId</td>
                                     <td>@booking.BookingDate.ToString("MMM dd, yyyy")</td>
                                     <td>$@booking.TotalAmount.ToString("#,##0.00")</td>
                                     <td>
-                                        <span class="badge @(booking.Status == "Confirmed" ? "bg-success" :
-                                                            (booking.Status == "Pending" ? "bg-warning" :
-                                                            (booking.Status == "Cancelled" ? "bg-danger" : "bg-secondary")))">
+                                        <span class="badge @(booking.Status == "success" ? "bg-success" :
+                                (booking.Status == "pending" ? "bg-warning" :
+                                (booking.Status == "cancelled" ? "bg-danger" : "bg-secondary")))">
                                             @booking.Status
                                         </span>
                                     </td>
                                     <td>
                                         <span class="badge @(booking.PaymentStatus == "Paid" ? "bg-success" :
-                                                            (booking.PaymentStatus == "Partially Paid" ? "bg-info" : "bg-danger"))">
+                                (booking.PaymentStatus == "NotPaid" ? "bg-info" : "bg-danger"))">
                                             @booking.PaymentStatus
                                         </span>
                                     </td>
@@ -66,18 +69,19 @@
                                                 Actions
                                             </button>
                                             <ul class="dropdown-menu">
-                                                <li><a class="dropdown-item" href="#">View Details</a></li>
+                                                
                                                 @if (booking.Status == "Pending" || booking.Status == "Confirmed")
                                                 {
-                                                    <li><a class="dropdown-item" href="#">Cancel Booking</a></li>
+                                                    <li><a class="dropdown-item" href="@Url.Action("CancelBooking", "Vendor", new { id = booking.Id, coupleId = booking.CoupleId, totalAmount = booking.TotalAmount })">Cancel Booking</a></li>
+
                                                 }
                                                 @if (booking.PaymentStatus != "Paid" && booking.Status != "Cancelled")
                                                 {
-                                                    <li><a class="dropdown-item" href="#">Make Payment</a></li>
+                                                    <li><a class="dropdown-item change-date" data-booking-id="@booking.Id" href="javascript:void(0)">Change Booking Date</a></li>
                                                 }
                                                 @if (booking.Status == "Confirmed" || booking.Status == "Completed")
                                                 {
-                                                    <li><a class="dropdown-item" href="#">Leave Review</a></li>
+                                                    <li><a class="dropdown-item leave-review" data-booking-id="@booking.Id" href="javascript:void(0)">Leave Review</a></li>
                                                 }
                                             </ul>
                                         </div>
@@ -92,9 +96,216 @@
             {
                 <div class="alert alert-info">
                     <p>You don't have any bookings yet.</p>
-                    <a asp-action="Index" class="btn btn-primary mt-3">Browse Vendors</a>
+                    <a asp-action="VendorListView" class="btn btn-primary mt-3">Browse Vendors</a>
                 </div>
             }
         </div>
     </div>
 </div>
+
+<!-- Date Change Modal -->
+<div class="modal fade" id="changeDateModal" tabindex="-1" aria-labelledby="changeDateModalLabel" aria-hidden="true">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" id="changeDateModalLabel">Change Booking Date</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+      <div class="modal-body">
+        <form id="changeDateForm">
+          <input type="hidden" id="bookingIdInput" name="id">
+          <div class="mb-3">
+            <label for="newBookingDate" class="form-label">Select New Date</label>
+            <input type="date" class="form-control" id="newBookingDate" name="bookingDate" required>
+          </div>
+        </form>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+        <button type="button" class="btn btn-primary" id="saveNewDate">Save changes</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Star Rating Modal -->
+<div class="modal fade" id="reviewModal" tabindex="-1" aria-labelledby="reviewModalLabel" aria-hidden="true">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" id="reviewModalLabel">Leave a Review</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+      <div class="modal-body">
+        <form id="reviewForm">
+          <input type="hidden" id="reviewBookingId" name="id">
+          <div class="mb-3">
+            <label class="form-label">Your Rating</label>
+            <div class="star-rating">
+              <i class="fas fa-star star-rating-item" data-rating="1"></i>
+              <i class="fas fa-star star-rating-item" data-rating="2"></i>
+              <i class="fas fa-star star-rating-item" data-rating="3"></i>
+              <i class="fas fa-star star-rating-item" data-rating="4"></i>
+              <i class="fas fa-star star-rating-item" data-rating="5"></i>
+            </div>
+            <input type="hidden" id="selectedRating" name="review" value="0">
+          </div>
+          <div class="mb-3">
+            <label for="reviewComment" class="form-label">Comments (Optional)</label>
+            <textarea class="form-control" id="reviewComment" rows="3"></textarea>
+          </div>
+        </form>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+        <button type="button" class="btn btn-primary" id="submitReview">Submit Review</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<style>
+  .star-rating {
+    font-size: 24px;
+    color: #ccc;
+    cursor: pointer;
+  }
+  .star-rating .fas.fa-star.active {
+    color: #ffc107;
+  }
+  .star-rating-item {
+    margin-right: 5px;
+  }
+</style>
+
+@section Scripts {
+<script>
+
+        $(document).ready(function() {
+            // Existing code...
+
+            // Handle leave review click
+            $('.leave-review').click(function() {
+                var bookingId = $(this).data('booking-id');
+                $('#reviewBookingId').val(bookingId);
+                $('#selectedRating').val(0);
+                $('.star-rating-item').removeClass('active');
+                $('#reviewModal').modal('show');
+            });
+
+            // Handle star rating selection
+            $('.star-rating-item').hover(
+                function() {
+                    var rating = $(this).data('rating');
+                    // Highlight stars on hover
+                    $('.star-rating-item').each(function() {
+                        if ($(this).data('rating') <= rating) {
+                            $(this).addClass('active');
+                        } else {
+                            $(this).removeClass('active');
+                        }
+                    });
+                },
+                function() {
+                    // On mouse out, show the current selected rating
+                    var selectedRating = $('#selectedRating').val();
+                    $('.star-rating-item').each(function() {
+                        if ($(this).data('rating') <= selectedRating) {
+                            $(this).addClass('active');
+                        } else {
+                            $(this).removeClass('active');
+                        }
+                    });
+                }
+            );
+
+            // Handle star click
+            $('.star-rating-item').click(function() {
+                var rating = $(this).data('rating');
+                $('#selectedRating').val(rating);
+
+                // Update the visual state
+                $('.star-rating-item').each(function() {
+                    if ($(this).data('rating') <= rating) {
+                        $(this).addClass('active');
+                    } else {
+                        $(this).removeClass('active');
+                    }
+                });
+            });
+
+            // Handle review submission
+            $('#submitReview').click(function() {
+                var bookingId = $('#reviewBookingId').val();
+                var rating = $('#selectedRating').val();
+
+                if (rating == 0) {
+                    alert('Please select a rating');
+                    return;
+                }
+
+                // Redirect to the review action with the parameters
+                window.location.href = '@Url.Action("AddReview", "Dashboard")' +
+                    '?id=' + bookingId +
+                    '&review=' + rating;
+            });
+        });
+
+    $(document).ready(function() {
+
+
+            // Handle date change click
+    $('.change-date').click(function() {
+        var bookingId = $(this).data('booking-id');
+        $('#bookingIdInput').val(bookingId);
+        $('#changeDateModal').modal('show');
+    });
+
+        // Initialize Bootstrap dropdowns
+    $('.dropdown-toggle').dropdown();
+
+        $('#saveNewDate').click(function() {
+        var bookingId = $('#bookingIdInput').val();
+        var newDate = $('#newBookingDate').val();
+        
+        if (!newDate) {
+            alert('Please select a date');
+            return;
+        }
+        
+        // Redirect to the update action with the parameters
+        window.location.href = '@Url.Action("UpdateBooking", "Dashboard")' + 
+                              '?id=' + bookingId + 
+                              '&bookingDate=' + newDate;
+            });
+
+        // Handle cancel booking action
+        $('.cancel-booking').click(function() {
+            var bookingId = $(this).data('booking-id');
+
+            if (confirm('Are you sure you want to cancel this booking?')) {
+                $.ajax({
+                    url: '@Url.Action("CancelBooking", "Booking")',
+                    type: 'POST',
+                    data: { id: bookingId },
+                    success: function(result) {
+                        if (result.success) {
+                            // Update the status in the table
+                            $('#booking-' + bookingId + ' td:nth-child(5)').text('Cancelled');
+                            // Refresh the actions dropdown or the entire row
+                            location.reload(); // Or implement a more sophisticated update
+                        } else {
+                            alert('Failed to cancel booking: ' + result.message);
+                        }
+                    },
+                    error: function() {
+                        alert('An error occurred while processing your request.');
+                    }
+                });
+            }
+        });
+    });
+
+
+</script>
+}

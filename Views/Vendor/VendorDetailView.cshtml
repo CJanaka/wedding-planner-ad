@@ -5,6 +5,7 @@
 }
 
 @model wedding_planer_ad.Models.ViewModels.VendorDetailsViewModel
+<h1 class="mb-4">Vendor Details</h1>
 
 <div class="container mt-4">
     <!-- Vendor details header -->
@@ -192,6 +193,7 @@
                 <div class="modal-body">
                     <input type="hidden" asp-for="Booking.VendorId" value="@Model.Vendor.Id" />
                     <input type="hidden" asp-for="Booking.CoupleId" value="@Model.Booking.CoupleId" />
+                    <input type="hidden" asp-for="Booking.Status" value="@wedding_planer_ad.Utils.Util.PENDING_STATUS" />
 
                     <div class="mb-3">
                         <label class="form-label">Service</label>
@@ -221,7 +223,8 @@
                         <label class="form-label">Amount</label>
                         <div class="input-group">
                             <span class="input-group-text">$</span>
-                            <input type="number" class="form-control" asp-for="Booking.TotalAmount" id="totalAmount" readonly />
+                            <input type="number" class="form-control" asp-for="Booking.TotalAmount" id="totalAmount" readonly step="0.01" />
+
                         </div>
                         <small class="form-text text-muted">The amount will be automatically calculated based on the selected service.</small>
                     </div>

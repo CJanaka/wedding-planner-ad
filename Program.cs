@@ -19,6 +19,9 @@ builder.Services.AddScoped<IWeddingPlannerService, WeddingPlannerService>();
 builder.Services.AddScoped<IUserService, UserService>();
 builder.Services.AddScoped<IAdminService, AdminService>();
 builder.Services.AddScoped<ICoupleDashboardService, CoupleDashboardService>();
+builder.Services.AddScoped<IVendorServices, VendorServices>();
+builder.Services.AddScoped<IGuestService, GuestService>();
+builder.Services.AddScoped<HelperService>();
 
 builder.Services.AddIdentity<ApplicationUser, IdentityRole>(options =>
 {

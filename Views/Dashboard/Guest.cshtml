@@ -1,0 +1,181 @@
+﻿@*
+    For more information on enabling MVC for empty projects, visit https://go.microsoft.com/fwlink/?LinkID=397860
+*@
+@{
+    Layout = "~/Views/Dashboard/_WeddingPlannerLayout.cshtml";
+    ViewData["Title"] = "Add Guest";
+}
+@if (TempData["SuccessMessage"] != null)
+{
+    <div class="alert alert-success">
+        @TempData["SuccessMessage"]
+    </div>
+}
+@if (TempData["ErrorMessage"] != null)
+{
+    <div class="alert alert-danger">
+        @TempData["ErrorMessage"]
+    </div>
+}
+@model wedding_planer_ad.Models.ViewModels.GuestViewModel
+<h1 class="mb-4">Guests</h1>
+@if (Model.Guests?.Any() == true)
+{
+    <table class="table">
+        <thead>
+            <tr>
+                <th>Name</th>
+                <th>Meal Preference</th>
+                <th>Allergies</th>
+                <th>Seating Arrangement</th>
+                <th>RSVP</th>
+                <th>Action</th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var guest in Model.Guests)
+            {
+                <tr data-id="@guest.Id">
+                    <td>@guest.FirstName @guest.LastName</td>
+                    <td>@guest.MealPreference</td>
+                    <td>@guest.Allergies</td>
+                    <td>@guest.SeatingArrangement</td>
+                    <td>@guest.RSVPStatus</td>
+                    <td>
+                        <button type="button" class="btn btn-success edit-guest"
+                                data-id="@guest.Id"
+                                data-firstname="@guest.FirstName"
+                                data-lastname="@guest.LastName"
+                                data-email="@guest.Email"
+                                data-rsvp="@guest.RSVPStatus"
+                                data-meal="@guest.MealPreference"
+                                data-allergies="@guest.Allergies"
+                                data-seating="@guest.SeatingArrangement">
+                            Edit
+                        </button>
+                    </td>
+                </tr>
+            }
+        </tbody>
+    </table>
+}
+<br />
+<hr />
+<h2 id="formTitle">Add Guest</h2>
+<form asp-action="Create" method="post" id="guestForm">
+    <input type="hidden" id="guestId" name="Guest.Id" value="0" />
+    <div class="mb-3">
+        <label asp-for="Guest.FirstName" class="form-label"></label>
+        <input asp-for="Guest.FirstName" class="form-control" />
+        <span asp-validation-for="Guest.FirstName" class="text-danger"></span>
+    </div>
+    <div class="mb-3">
+        <label asp-for="Guest.LastName" class="form-label"></label>
+        <input asp-for="Guest.LastName" class="form-control" />
+    </div>
+    <div class="mb-3">
+        <label asp-for="Guest.Email" class="form-label"></label>
+        <input asp-for="Guest.Email" type="email" class="form-control" />
+    </div>
+    <div class="mb-3">
+        <label asp-for="Guest.RSVPStatus" class="form-label"></label>
+        <select asp-for="Guest.RSVPStatus" class="form-select">
+            <option value="Attending">Attending</option>
+            <option value="Not Attending">Not Attending</option>
+            <option value="Pending">Pending</option>
+        </select>
+    </div>
+    <div class="mb-3">
+        <label asp-for="Guest.MealPreference" class="form-label"></label>
+        <input asp-for="Guest.MealPreference" class="form-control" />
+    </div>
+    <div class="mb-3">
+        <label asp-for="Guest.Allergies" class="form-label"></label>
+        <input asp-for="Guest.Allergies" class="form-control" />
+    </div>
+    <div class="mb-3">
+        <label asp-for="Guest.SeatingArrangement" class="form-label"></label>
+        <input asp-for="Guest.SeatingArrangement" class="form-control" />
+    </div>
+    <!-- In real app, CoupleId should come from logged-in user -->
+    <input type="hidden" asp-for="Guest.CoupleId" value="@Model.CoupleId" />
+
+    <div class="d-flex">
+        <button type="submit" class="btn btn-primary me-2" id="saveButton">Save Guest</button>
+        <button type="button" class="btn btn-success" id="updateButton" style="display:none;">Update Guest</button>
+        <button type="button" class="btn btn-secondary ms-2" id="cancelButton" style="display:none;">Cancel</button>
+    </div>
+</form>
+
+@section Scripts {
+    <script>
+        $(document).ready(function() {
+            // Handle edit button click
+            $('.edit-guest').click(function() {
+                // Get data from button attributes
+                var id = $(this).data('id');
+                var firstName = $(this).data('firstname');
+                var lastName = $(this).data('lastname');
+                var email = $(this).data('email');
+                var rsvp = $(this).data('rsvp');
+                var meal = $(this).data('meal');
+                var allergies = $(this).data('allergies');
+                var seating = $(this).data('seating');
+
+                // Fill form with guest data
+                $('#guestId').val(id);
+                $('#Guest_FirstName').val(firstName);
+                $('#Guest_LastName').val(lastName);
+                $('#Guest_Email').val(email);
+                $('#Guest_RSVPStatus').val(rsvp);
+                $('#Guest_MealPreference').val(meal);
+                $('#Guest_Allergies').val(allergies);
+                $('#Guest_SeatingArrangement').val(seating);
+
+                // Update UI for edit mode
+                $('#formTitle').text('Edit Guest');
+                $('#saveButton').hide();
+                $('#updateButton').show();
+                $('#cancelButton').show();
+
+                // Scroll to form
+                $('html, body').animate({
+                    scrollTop: $("#formTitle").offset().top - 100
+                }, 500);
+            });
+
+            // Cancel button restores form to Add mode
+            $('#cancelButton').click(function() {
+                resetForm();
+            });
+
+            // Update button submits to different action
+            $('#updateButton').click(function() {
+                // Change form action to Update
+                $('#guestForm').attr('action', '@Url.Action("Update")');
+                $('#guestForm').submit();
+            });
+
+            function resetForm() {
+                // Clear form fields
+                $('#guestId').val(0);
+                $('#Guest_FirstName').val('');
+                $('#Guest_LastName').val('');
+                $('#Guest_Email').val('');
+                $('#Guest_RSVPStatus').val('Pending');
+                $('#Guest_MealPreference').val('');
+                $('#Guest_Allergies').val('');
+                $('#Guest_SeatingArrangement').val('');
+
+                // Reset UI to Add mode
+                $('#formTitle').text('Add Guest');
+                $('#saveButton').show();
+                $('#updateButton').hide();
+                $('#cancelButton').hide();
+
+                // Reset form action
+                $('#guestForm').attr('action', '@Url.Action("Create")');
+            }
+        });
+    </script>
+}

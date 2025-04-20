@@ -2,12 +2,14 @@
     For more information on enabling MVC for empty projects, visit https://go.microsoft.com/fwlink/?LinkID=397860
 *@
 @{
+    Layout = "~/Views/Dashboard/_WeddingPlannerLayout.cshtml";
+
 }
 
 @model wedding_planer_ad.Models.ViewModels.VendorBookingViewModel
 
 <div class="container mt-4">
-    <h1 class="mb-4">Browse Vendors</h1>
+    <h1 class="mb-4">Services and Vendors</h1>
 
     <!-- Filter and search section -->
     <div class="card mb-4">
@@ -26,19 +28,6 @@
                             {
                                 <option value="@category.Id">@category.Name</option>
                             }
-                        </select>
-                    </div>
-                    <div class="col-md-3">
-                        <label class="form-label">Location</label>
-                        <input type="text" class="form-control" asp-for="Location" placeholder="City or area...">
-                    </div>
-                    <div class="col-md-3">
-                        <label class="form-label">Sort By</label>
-                        <select class="form-select" asp-for="SortOrder">
-                            <option value="rating_desc">Highest Rated</option>
-                            <option value="price_asc">Price (Low to High)</option>
-                            <option value="price_desc">Price (High to Low)</option>
-                            <option value="name_asc">Name (A to Z)</option>
                         </select>
                     </div>
                     <div class="col-12">
@@ -86,14 +75,12 @@
                                     <i class="bi bi-star text-warning"></i>
                                 }
                             }
-                            <span class="ms-1">@vendor.Rating.ToString("0.0")</span>
-                            <span class="text-muted">(@(vendor.Reviews?.Count ?? 0) reviews)</span>
                         </div>
 
                         <p class="card-text">@(vendor.Description?.Length > 100 ? vendor.Description.Substring(0, 100) + "..." : vendor.Description)</p>
 
                         <div class="d-flex justify-content-between align-items-center">
-                            <span class="fw-bold">Starting at $@vendor.Pricing</span>
+                            <span class="fw-bold">Starting at $@String.Format("{0:0.00}", vendor.Pricing)</span>
                             <span class="text-muted"><i class="bi bi-geo-alt"></i> @vendor.Location</span>
                         </div>
                     </div>

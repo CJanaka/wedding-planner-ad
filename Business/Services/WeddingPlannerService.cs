@@ -61,22 +61,16 @@ namespace wedding_planer_ad.Business.Services
             }
         }
 
-        public async Task<WeddingPlanner> CreateAsync(WeddingPlanner planner)
+
+        public async Task<bool> CreateAsync(WeddingPlanner planner)
         {
-            try
-            {
-                planner.AssignedDate = DateTime.UtcNow;
-                _context.weddingPlanner.Add(planner);
-                await _context.SaveChangesAsync();
-                return planner;
-            }
-            catch (Exception ex)
-            {
-                throw new Exception("Error creating wedding planner.", ex);
-            }
+            planner.AssignedDate = DateTime.UtcNow;
+            _context.weddingPlanner.Add(planner);
+            await _context.SaveChangesAsync();
+            return true;
         }
 
-        public async Task<WeddingPlanner> UpdateAsync(WeddingPlanner planner)
+        public async Task<bool> UpdateAsync(WeddingPlanner planner)
         {
             try
             {
@@ -94,13 +88,13 @@ namespace wedding_planer_ad.Business.Services
                 if (planner.AssignedDate != default)
                     existing.AssignedDate = planner.AssignedDate;
 
-                await _context.SaveChangesAsync();
-                return existing;
             }
-            catch (Exception ex)
-            {
+            catch (Exception ex) { 
                 throw new Exception("Error updating wedding planner.", ex);
+
             }
+            await _context.SaveChangesAsync();
+            return true;
         }
 
         public async Task<bool> DeleteAsync(int id)
@@ -372,6 +366,9 @@ namespace wedding_planer_ad.Business.Services
 
         public async Task AddChecklistTaskAsync(WeddingChecklist checklist)
         {
+            checklist.AssignedTo = string.Empty;
+            checklist.IsDeleted = false;
+            checklist.IsCompleted = false;
             try
             {
                 checklist.AssignedTo = string.Empty;
@@ -488,6 +485,18 @@ namespace wedding_planer_ad.Business.Services
             {
                 throw new Exception("Error retrieving couple by user ID.", ex);
             }
+        }
+
+        public async Task<WeddingPlanner> GetByUserId(string id)
+        {
+           return await _context.weddingPlanner
+            .FirstOrDefaultAsync(p => p.PlannerUserId == id);
+        }
+
+        public async Task<WeddingPlanner> GetByCoupleId(int id)
+        {
+            return await _context.weddingPlanner
+                .FirstOrDefaultAsync(p => p.CoupleId == id);
         }
     }
 }

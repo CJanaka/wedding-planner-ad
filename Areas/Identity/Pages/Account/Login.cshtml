@@ -1,6 +1,19 @@
 ﻿@page
 @model LoginModel
 
+@if (TempData["SuccessMessage"] != null)
+{
+    <div class="alert alert-success">
+        @TempData["SuccessMessage"]
+    </div>
+}
+@if (TempData["ErrorMessage"] != null)
+{
+    <div class="alert alert-danger">
+        @TempData["ErrorMessage"]
+    </div>
+}
+
 <div class="d-flex justify-content-center align-items-start vh-100" style="margin-top: -30px;">
     <div class="col-md-4">
         <section>

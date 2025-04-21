@@ -7,6 +7,7 @@ using wedding_planer_ad.Business.Services;
 using wedding_planer_ad.Models;
 using wedding_planer_ad.Models.DTO;
 using Microsoft.AspNetCore.Authorization;
+using System.Diagnostics;
 
 namespace wedding_planer_ad.Controllers
 {
@@ -16,13 +17,16 @@ namespace wedding_planer_ad.Controllers
         private readonly IUserService _userService;
         private readonly IWeddingPlannerService _weddingService;
         private readonly IAdminService _adminService;
+        private readonly IVendorServices _vendorServices;
 
 
-        public AdminController(IUserService userService, IWeddingPlannerService weddingService,IAdminService adminService)
+        public AdminController(IUserService userService, IWeddingPlannerService weddingService,
+            IAdminService adminService, IVendorServices vendorServices)
         {
             _userService = userService;
             _weddingService = weddingService;
             _adminService = adminService;
+            _vendorServices = vendorServices;
         }
         public async Task<IActionResult> Index()
         {
@@ -160,29 +164,63 @@ namespace wedding_planer_ad.Controllers
         [HttpGet]
         public IActionResult AddVendor()
         {
-            return View(new AdminUserDto());
+            return View(new NewVendorDto());
         }
        
 
         [HttpPost]
         public async Task<IActionResult> AddVendor(NewVendorDto dto)
         {
+            Debug.WriteLine("venerror00 "+ ModelState.IsValid);
+
+            foreach (var key in ModelState.Keys)
+            {
+                var errors = ModelState[key].Errors;
+                foreach (var error in errors)
+                {
+                    Debug.WriteLine($"Model error for '{key}': {error.ErrorMessage}");
+                }
+            }
             if (!ModelState.IsValid)
             {
                 return View(dto);
             }
+            try { 
+            
+                var result = await _userService.CreateVendorAsync(dto);
 
-            var result = await _userService.CreateVendorAsync(dto);
-            if (!result.Succeeded)
-            {
-                foreach (var error in result.Errors)
+                if (!result.Succeeded)
                 {
-                    ModelState.AddModelError(string.Empty, error.Description);
+                    foreach (var error in result.Errors)
+                    {
+                        ModelState.AddModelError(string.Empty, error.Description);
+                    }
+                    return View(dto);
                 }
-                return View(dto);
-            }
 
-            return RedirectToAction("Couples");
+                var user = await _userService.GetByEmail(dto.Email);
+
+                var vendor = new Vendor {
+                    UserId = user.Id,
+                    Name = dto.FirstName,
+                    ContactEmail = dto.Email,
+                    Phone = dto.PhoneNumber,
+                    Pricing = 0,
+                    Rating = 0,
+                    IsDeleted = false,
+                    CreatedAt = DateTime.Now,
+                    UpdatedAt = DateTime.Now,
+
+                };
+
+                await _vendorServices.CreateAsync(vendor);
+            }
+            catch (Exception e) {
+                Debug.WriteLine("venerror3 ");
+
+                throw new Exception("Vendor creation failed: "+e.Message);
+            }
+            return RedirectToAction("Vendor");
         }
 
         [HttpGet]

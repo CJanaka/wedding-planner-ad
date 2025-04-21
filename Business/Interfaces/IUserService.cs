@@ -20,6 +20,7 @@ namespace wedding_planer_ad.Business.Interfaces
 
         Task<IdentityResult> CreateCoupleAsync(NewCoupleDto dto);
         Task<IdentityResult> CreateVendorAsync(NewVendorDto dto);
+        Task<ApplicationUser> GetByEmail(string mail);
 
     }
 }

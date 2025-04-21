@@ -131,6 +131,11 @@ namespace wedding_planer_ad.Areas.Identity.Pages.Account
                     {
                         return LocalRedirect("~/Dashboard");
                     }
+                    
+                    else if (await _userManager.IsInRoleAsync(user, "Vendor"))
+                    {
+                        return LocalRedirect("~/Vendor/Vendor");
+                    }
                 }
                 if (result.RequiresTwoFactor)
                 {

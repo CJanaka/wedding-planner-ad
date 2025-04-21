@@ -1,4 +1,5 @@
 ﻿using System.Diagnostics;
+using System.Security.Claims;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
@@ -149,6 +150,173 @@ namespace wedding_planer_ad.Controllers
             TempData["SuccessMessage"] = "Booking removed!";
 
             return RedirectToAction(nameof(MyBookings));
+        }
+
+        public async Task<IActionResult> Vendor()
+        {
+            var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+
+            if (string.IsNullOrEmpty(userId))
+            {
+                return RedirectToAction("Login", "Account");
+            }
+            Debug.WriteLine("pop here01");
+
+            var viewModel = await _vendorService.GetDashboardDataAsync(userId);
+
+            if (viewModel == null)
+            {
+                Debug.WriteLine("pop here02");
+                return NotFound();
+            }
+
+            return View("Vendor",viewModel);
+        }
+
+        [HttpPost]
+        public async Task<IActionResult> ConfirmBooking(int bookingId)
+        {
+            var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+
+            if (string.IsNullOrEmpty(userId))
+            {
+                return Unauthorized();
+            }
+
+            var result = await _vendorService.ConfirmBookingAsync(bookingId, userId);
+
+            if (!result)
+            {
+                return NotFound("Booking not found or you don't have permission to confirm it");
+            }
+
+            return RedirectToAction("Dashboard");
+        }
+
+        [HttpPost]
+        public async Task<IActionResult> AddService(VendorService service)
+        {
+            if (!ModelState.IsValid)
+            {
+                foreach (var key in ModelState.Keys)
+                {
+                    var errors = ModelState[key].Errors;
+                    foreach (var error in errors)
+                    {
+                        Debug.WriteLine($"Model error for '{key}': {error.ErrorMessage}");
+                    }
+                }
+                // Return to dashboard with validation errors
+                return RedirectToAction("Vendor");
+            }
+
+            var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+
+            if (string.IsNullOrEmpty(userId))
+            {
+                return Unauthorized();
+            }
+
+            var result = await _vendorService.AddServiceAsync(service, userId);
+
+            if (!result)
+            {
+                return NotFound("Vendor not found");
+            }
+
+            return RedirectToAction("Vendor");
+        }
+
+        [HttpPost]
+        public async Task<IActionResult> DeleteService(int serviceId)
+        {
+            var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+
+            if (string.IsNullOrEmpty(userId))
+            {
+                return Unauthorized();
+            }
+
+            var result = await _vendorService.DeleteServiceAsync(serviceId, userId);
+
+            if (!result)
+            {
+                return NotFound("Service not found or you don't have permission to delete it");
+            }
+
+            return RedirectToAction("Dashboard");
+        }
+
+        [HttpGet]
+        public async Task<IActionResult> GetBookingDetails(int id)
+        {
+            var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+
+            if (string.IsNullOrEmpty(userId))
+            {
+                return Unauthorized();
+            }
+
+            var bookingDetails = await _vendorService.GetBookingDetailsAsync(id, userId);
+
+            if (bookingDetails == null)
+            {
+                return NotFound("Booking not found or you don't have permission to view it");
+            }
+
+            return Json(bookingDetails);
+        }
+
+        [HttpPost]
+        public async Task<IActionResult> UpdateService(VendorService service)
+        {
+            if (!ModelState.IsValid)
+            {
+                // Return validation errors if needed
+                return RedirectToAction("Vendor");
+            }
+
+            var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+
+            if (string.IsNullOrEmpty(userId))
+            {
+                return Unauthorized();
+            }
+
+            var result = await _vendorService.UpdateServiceAsync(service, userId);
+
+            if (!result)
+            {
+                return NotFound("Service not found or you don't have permission to update it");
+            }
+
+            return RedirectToAction("Vendor");
+        }
+
+        [HttpPost]
+        [Authorize]
+        public async Task<IActionResult> UpdateBooking(int id, string status)
+        {
+
+
+            var booking = new Booking
+            {
+                Id = id,
+                Status = status,
+                IsDeleted = false
+            };
+
+            var success = await _coupleDashboardService.UpdateBookingAsync(booking);
+
+            if (!success)
+            {
+                TempData["ErrorMessage"] = "Unable to updated booking status";
+                return RedirectToAction(nameof(Vendor));
+            }
+
+            TempData["SuccessMessage"] = "Booking status updated successful!";
+
+            return RedirectToAction(nameof(Vendor));
         }
     }
 }

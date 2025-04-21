@@ -30,7 +30,7 @@
             @if (Model != null && Model.Any())
             {
                 <div class="table-responsive">
-                    <table class="table table-striped">
+                    <table class="table mt-5 mb-5 table-striped">
                         <thead>
                             <tr>
                                 <th>Vendor</th>
@@ -38,7 +38,6 @@
                                 <th>Date</th>
                                 <th>Amount</th>
                                 <th>Status</th>
-                                <th>Payment</th>
                                 <th>Actions</th>
                             </tr>
                         </thead>
@@ -52,16 +51,10 @@
                                     <td>$@booking.TotalAmount.ToString("#,##0.00")</td>
                                     <td>
                                         <span class="badge @(booking.Status == "success" ? "bg-success" :
-                                (booking.Status == "pending" ? "bg-warning" :
-                                (booking.Status == "cancelled" ? "bg-danger" : "bg-secondary")))">
+                                            (booking.Status == "pending" ? "bg-warning" :
+                                            (booking.Status == "cancelled" ? "bg-danger" : "bg-secondary")))">
                                             @booking.Status
-                                        </span>
-                                    </td>
-                                    <td>
-                                        <span class="badge @(booking.PaymentStatus == "Paid" ? "bg-success" :
-                                (booking.PaymentStatus == "NotPaid" ? "bg-info" : "bg-danger"))">
-                                            @booking.PaymentStatus
-                                        </span>
+                                         </span>
                                     </td>
                                     <td>
                                         <div class="btn-group">
@@ -96,7 +89,7 @@
             {
                 <div class="alert alert-info">
                     <p>You don't have any bookings yet.</p>
-                    <a asp-action="VendorListView" class="btn btn-primary mt-3">Browse Vendors</a>
+                    <a asp-controller="Vendor" asp-action="VendorListView" class="btn btn-primary mt-3">Browse Vendors</a>
                 </div>
             }
         </div>

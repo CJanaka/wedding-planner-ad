@@ -8,12 +8,12 @@ namespace wedding_planer_ad.Models
         public int Id { get; set; }
         public string UserId { get; set; }
         public string Name { get; set; }
-        //public string Category { get; set; }
-        public string Description { get; set; }
+
+        public string? Description { get; set; }
         public decimal Pricing { get; set; }
-        public string Location { get; set; }
+        public string? Location { get; set; }
         public decimal Rating { get; set; }
-        public string ProfilePicture { get; set; }
+        public string? ProfilePicture { get; set; }
         public DateTime CreatedAt { get; set; }
         public DateTime UpdatedAt { get; set; }
         public bool IsDeleted { get; set; }
@@ -22,7 +22,7 @@ namespace wedding_planer_ad.Models
         public ICollection<Booking> Bookings { get; set; }
         public ICollection<Review> Reviews { get; set; }
         public ICollection<Venue> Venues { get; set; }
-        public int CategoryId { get; set; }
+        public int? CategoryId { get; set; }
         public string ContactEmail { get; set; }
         public string Phone { get; set; }
         public string? WebsiteUrl { get; set; }

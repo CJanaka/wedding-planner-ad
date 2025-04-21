@@ -1,4 +1,4 @@
-﻿@model wedding_planer_ad.Models.DTO.AdminUserDto
+﻿@model wedding_planer_ad.Models.DTO.NewVendorDto
 
 @{
     Layout = "~/Views/Admin/_AdminLayout.cshtml";
@@ -33,9 +33,9 @@
     </div>
 
     <div class="form-group mb-3">
-        <label asp-for="NewPassword">Password</label>
-        <input asp-for="NewPassword" class="form-control" type="password" />
-        <span asp-validation-for="NewPassword" class="text-danger"></span>
+        <label asp-for="Password">Password</label>
+        <input asp-for="Password" class="form-control" type="password" />
+        <span asp-validation-for="Password" class="text-danger"></span>
     </div>
 
     <button type="submit" class="btn btn-success">Add Vendor</button>

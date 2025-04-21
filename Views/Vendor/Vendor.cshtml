@@ -1,0 +1,665 @@
+﻿@model wedding_planer_ad.Models.ViewModels.VendorDashboardViewModel
+@{
+    Layout = "~/Views/Vendor/_VendorLayout.cshtml";
+
+    ViewData["Title"] = "Vendor Dashboard";
+}
+
+@if (TempData["SuccessMessage"] != null)
+{
+    <div class="alert alert-success">
+        @TempData["SuccessMessage"]
+    </div>
+}
+@if (TempData["ErrorMessage"] != null)
+{
+    <div class="alert alert-danger">
+        @TempData["ErrorMessage"]
+    </div>
+}
+
+<div class="container py-4">
+    <div class="row mb-4">
+        <div class="col-md-8">
+            <h1>Welcome, @Model.CurrentVendor.Name!</h1>
+            <p class="text-muted">Manage your bookings and services from one place</p>
+        </div>
+    </div>
+
+    <!-- Vendor Statistics -->
+    <div class="row mb-4">
+        <div class="col-md-4 mb-3">
+            <div class="card shadow-sm h-100">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between">
+                        <div>
+                            <h5 class="card-title">Pending Bookings</h5>
+                            <h2 class="mb-0">@Model.PendingBookingsCount</h2>
+                        </div>
+                        <div class="align-self-center">
+                            <i class="bi bi-hourglass text-warning" style="font-size: 2rem;"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-4 mb-3">
+            <div class="card shadow-sm h-100">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between">
+                        <div>
+                            <h5 class="card-title">Confirmed Bookings</h5>
+                            <h2 class="mb-0">@Model.ConfirmedBookingsCount</h2>
+                        </div>
+                        <div class="align-self-center">
+                            <i class="bi bi-check-circle text-success" style="font-size: 2rem;"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-4 mb-3">
+            <div class="card shadow-sm h-100">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between">
+                        <div>
+                            <h5 class="card-title">Total Revenue</h5>
+                            <h2 class="mb-0">$@Model.TotalRevenue.ToString("N2")</h2>
+                        </div>
+                        <div class="align-self-center">
+                            <i class="bi bi-cash-stack text-primary" style="font-size: 2rem;"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Vendor Profile -->
+    <div class="row mb-4">
+        <div class="col-md-4 mb-3">
+            <div class="card shadow-sm h-76">
+                <div class="card-body">
+                    <div class="text-center mb-3">
+                        @if (!string.IsNullOrEmpty(Model.CurrentVendor.ProfilePicture))
+                        {
+                            <img src="@Model.CurrentVendor.ProfilePicture" alt="@Model.CurrentVendor.Name" class="rounded-circle mb-3" style="width: 120px; height: 120px; object-fit: cover;">
+                        }
+                        else
+                        {
+                            <div class="rounded-circle bg-secondary d-flex align-items-center justify-content-center mb-3 mx-auto" style="width: 120px; height: 120px;">
+                                <i class="bi bi-person text-white" style="font-size: 3rem;"></i>
+                            </div>
+                        }
+                        <h4 class="card-title">@Model.CurrentVendor.Name</h4>
+                        <p class="text-muted">@Model.CurrentVendor.Category?.Name</p>
+                        <div class="d-flex justify-content-center mb-2">
+                            @for (int i = 0; i < 5; i++)
+                            {
+                                if (i < Math.Floor(Model.CurrentVendor.Rating))
+                                {
+                                    <i class="bi bi-star-fill text-warning me-1"></i>
+                                }
+                                else if (i < Model.CurrentVendor.Rating)
+                                {
+                                    <i class="bi bi-star-half text-warning me-1"></i>
+                                }
+                                else
+                                {
+                                    <i class="bi bi-star text-warning me-1"></i>
+                                }
+                            }
+                            
+                        </div>
+                    </div>
+                    <div class="border-top pt-3">
+                        <p><i class="bi bi-envelope me-2"></i> @Model.CurrentVendor.ContactEmail</p>
+                        <p><i class="bi bi-telephone me-2"></i> @Model.CurrentVendor.Phone</p>
+                        @if (!string.IsNullOrEmpty(Model.CurrentVendor.WebsiteUrl))
+                        {
+                            <p><i class="bi bi-globe me-2"></i> <a href="@Model.CurrentVendor.WebsiteUrl" target="_blank">Website</a></p>
+                        }
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-8">
+            <div class="row mb-4">
+
+                <div class="card shadow-sm h-50">
+                    <div class="card-header bg-white">
+                        <h5 class="mb-0">About</h5>
+                    </div>
+                    <div class="card-body">
+                        <p>@Model.CurrentVendor.Description</p>
+                        <div class="row mt-4">
+                            <div class="col-md-6">
+                                <h6>Base Price</h6>
+                                <p class="text-primary fw-bold">$@Model.CurrentVendor.Pricing.ToString("N2")</p>
+                            </div>
+                            <div class="col-md-6">
+                                <h6>Member Since</h6>
+                                <p>@Model.CurrentVendor.CreatedAt.ToString("MMMM yyyy")</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Services Management -->
+            <div class="row">
+                    <div class="card shadow-sm">
+                        <div class="card-header bg-white d-flex justify-content-between align-items-center">
+                            <h5 class="mb-0">My Services</h5>
+                            <button type="button" class="btn btn-sm btn-primary" data-bs-toggle="modal" data-bs-target="#addServiceModal">
+                                <i class="bi bi-plus-lg"></i> Add Service
+                            </button>
+                        </div>
+                        <div class="card-body">
+                            @if (Model.Services != null && Model.Services.Any())
+                            {
+                                <div class="table-responsive">
+                                    <table class="table table-striped">
+                                        <thead>
+                                            <tr>
+                                                <th>Service Name</th>
+                                                <th>Description</th>
+                                                <th>Price</th>
+                                                <th>Actions</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            @foreach (var service in Model.Services)
+                                            {
+                                                <tr>
+                                                    <td>@service.ServiceName</td>
+                                                    <td>@service.Description</td>
+                                                    <td>$@service.Price.ToString("N2")</td>
+                                                    <td>
+                                                        <div class="btn-group" role="group">
+                                                        <a href="#" class="btn btn-sm btn-outline-primary me-1"
+                                                           data-bs-toggle="modal"
+                                                           data-bs-target="#editServiceModal"
+                                                           data-id="@service.Id"
+                                                           data-name="@service.ServiceName"
+                                                           data-description="@service.Description"
+                                                           data-price="@service.Price">
+                                                            Edit <i class="bi bi-pencil"></i>
+                                                        </a>
+                                                            <form asp-controller="Vendor" asp-action="DeleteService" method="post" style="display: inline;">
+                                                                <input type="hidden" name="serviceId" value="@service.Id" />
+                                                                <button type="submit" class="btn btn-sm btn-danger" onclick="return confirm('Are you sure you want to delete this service?')">
+                                                                    Remove <i class="bi bi-trash"></i>
+                                                                </button>
+                                                            </form>
+                                                        </div>
+
+                                                    </td>
+                                                </tr>
+                                            }
+                                        </tbody>
+                                    </table>
+                                </div>
+                            }
+                            else
+                            {
+                                <div class="text-center py-5">
+                                    <i class="bi bi-shop text-muted mb-3" style="font-size: 3rem;"></i>
+                                    <h5>No services added yet</h5>
+                                    <p class="text-muted">Add your first service to start receiving bookings</p>
+                                    <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#addServiceModal">
+                                        <i class="bi bi-plus-lg"></i> Add Service
+                                    </button>
+                                </div>
+                            }
+                        </div>
+                    </div>
+
+            </div>
+        </div>
+    </div>
+
+    <!-- Bookings Management -->
+    <div class="card shadow-sm mb-4">
+        <div class="card-header bg-white d-flex justify-content-between align-items-center">
+            <h5 class="mb-0">Bookings</h5>
+            <ul class="nav nav-tabs card-header-tabs" id="bookingTabs" role="tablist">
+                <li class="nav-item">
+                    <a class="nav-link active" id="all-tab" data-bs-toggle="tab" href="#all" role="tab" aria-controls="all" aria-selected="true">All</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" id="pending-tab" data-bs-toggle="tab" href="#pending" role="tab" aria-controls="pending" aria-selected="false">Pending</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" id="confirmed-tab" data-bs-toggle="tab" href="#confirmed" role="tab" aria-controls="confirmed" aria-selected="false">Confirmed</a>
+                </li>
+            </ul>
+        </div>
+        <div class="card-body">
+            <div class="tab-content" id="bookingTabsContent">
+                <div class="tab-pane fade show active" id="all" role="tabpanel" aria-labelledby="all-tab">
+                    @if (Model.Bookings != null && Model.Bookings.Any())
+                    {
+                        <div class="table-responsive">
+                            <table class="table table-striped table-hover">
+                                <thead>
+                                    <tr>
+                                        <th>Booking ID</th>
+                                        <th>Date</th>
+                                        <th>Service</th>
+                                        <th>Amount</th>
+                                        <th>Status</th>
+                                        <th>Actions</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    @foreach (var booking in Model.Bookings)
+                                    {
+                                        <tr>
+                                            <td>#@booking.Id</td>
+                                            <td>@booking.BookingDate.ToString("MMM dd, yyyy")</td>
+                                            <td>@booking.ServiceDetails</td>
+                                            <td>$@booking.TotalAmount.ToString("N2")</td>
+                                            <td>
+                                                <span class="badge @(booking.Status == "Confirmed" ? "bg-success" : booking.Status == "Pending" ? "bg-warning" : "bg-secondary")">
+                                                    @booking.Status
+                                                </span>
+                                            </td>
+                                            <td>
+                                                <div class="btn-group" role="group">
+                                                    <button type="button" class="btn btn-sm btn-outline-primary me-1"
+                                                            data-bs-toggle="modal"
+                                                            data-bs-target="#viewBookingModal"
+                                                            data-id="@booking.Id"
+                                                            data-date="@booking.BookingDate.ToString("MMM dd, yyyy")"
+                                                            data-service="@booking.ServiceDetails"
+                                                            data-amount="@booking.TotalAmount"
+                                                            data-status="@booking.Status"
+                                                            data-payment="@booking.PaymentStatus">
+                                                        <i class="bi bi-eye"></i> View
+                                                    </button>
+                                                    <button type="button" class="btn btn-sm btn-outline-success update-status-btn"
+                                                            data-id="@booking.Id"
+                                                            data-current-status="@booking.Status">
+                                                        <i class="bi bi-arrow-clockwise"></i> Update Status
+                                                    </button>
+                                                </div>
+                                            </td>
+                                        </tr>
+                                    }
+                                </tbody>
+                            </table>
+                        </div>
+                    }
+                    else
+                    {
+                        <div class="alert alert-info text-center">
+                            <i class="bi bi-calendar-x mb-2" style="font-size: 2rem;"></i>
+                            <p>No bookings available</p>
+                        </div>
+                    }
+                </div>
+                <div class="tab-pane fade" id="pending" role="tabpanel" aria-labelledby="pending-tab">
+                    @if (Model.Bookings != null && Model.Bookings.Any(b => b.Status == "Pending"))
+                    {
+                        <div class="table-responsive">
+                            <table class="table table-striped table-hover">
+                                <thead>
+                                    <tr>
+                                        <th>Booking ID</th>
+                                        <th>Date</th>
+                                        <th>Service</th>
+                                        <th>Amount</th>
+                                        <th>Actions</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    @foreach (var booking in Model.Bookings.Where(b => b.Status == "Pending"))
+                                    {
+                                        <tr>
+                                            <td>#@booking.Id</td>
+                                            <td>@booking.BookingDate.ToString("MMM dd, yyyy")</td>
+                                            <td>@booking.ServiceDetails</td>
+                                            <td>$@booking.TotalAmount.ToString("N2")</td>
+
+                                            <td>
+                                                <div class="btn-group" role="group">
+                                                    <button type="button" class="btn btn-sm btn-outline-primary me-1"
+                                                            data-bs-toggle="modal"
+                                                            data-bs-target="#viewBookingModal"
+                                                            data-id="@booking.Id"
+                                                            data-date="@booking.BookingDate.ToString("MMM dd, yyyy")"
+                                                            data-service="@booking.ServiceDetails"
+                                                            data-amount="@booking.TotalAmount"
+                                                            data-status="@booking.Status"
+                                                            data-payment="@booking.PaymentStatus">
+                                                        <i class="bi bi-eye"></i> View
+                                                    </button>
+                                                    <button type="button" class="btn btn-sm btn-success update-status-btn"
+                                                            data-id="@booking.Id"
+                                                            data-current-status="@booking.Status">
+                                                        <i class="bi bi-check-circle"></i> Confirm
+                                                    </button>
+                                                </div>
+                                            </td>
+                                        </tr>
+                                    }
+                                </tbody>
+                            </table>
+                        </div>
+                    }
+                    else
+                    {
+                        <div class="alert alert-info text-center">
+                            <i class="bi bi-calendar-check mb-2" style="font-size: 2rem;"></i>
+                            <p>No pending bookings</p>
+                        </div>
+                    }
+                </div>
+                <div class="tab-pane fade" id="confirmed" role="tabpanel" aria-labelledby="confirmed-tab">
+                    @if (Model.Bookings != null && Model.Bookings.Any(b => b.Status == "Confirmed"))
+                    {
+                        <div class="table-responsive">
+                            <table class="table table-striped table-hover">
+                                <thead>
+                                    <tr>
+                                        <th>Booking ID</th>
+                                        <th>Date</th>
+                                        <th>Service</th>
+                                        <th>Amount</th>
+                                        <th>Actions</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    @foreach (var booking in Model.Bookings.Where(b => b.Status == "Confirmed"))
+                                    {
+                                        <tr>
+                                            <td>#@booking.Id</td>
+                                            <td>@booking.BookingDate.ToString("MMM dd, yyyy")</td>
+                                            <td>@booking.ServiceDetails</td>
+                                            <td>$@booking.TotalAmount.ToString("N2")</td>
+                                            <td>
+                                                <button type="button" class="btn btn-sm btn-outline-primary"
+                                                        data-bs-toggle="modal"
+                                                        data-bs-target="#viewBookingModal"
+                                                        data-id="@booking.Id"
+                                                        data-date="@booking.BookingDate.ToString("MMM dd, yyyy")"
+                                                        data-service="@booking.ServiceDetails"
+                                                        data-amount="@booking.TotalAmount"
+                                                        data-status="@booking.Status"
+                                                        data-payment="@booking.PaymentStatus">
+                                                    <i class="bi bi-eye"></i> View Details
+                                                </button>
+                                            </td>
+                                        </tr>
+                                    }
+                                </tbody>
+                            </table>
+                        </div>
+                    }
+                    else
+                    {
+                        <div class="alert alert-info text-center">
+                            <i class="bi bi-calendar-check mb-2" style="font-size: 2rem;"></i>
+                            <p>No confirmed bookings</p>
+                        </div>
+                    }
+                </div>
+            </div>
+        </div>
+    </div>
+
+</div>
+
+<!-- Add Service Modal -->
+<div class="modal fade" id="addServiceModal" tabindex="-1" aria-labelledby="addServiceModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <form asp-controller="Vendor" asp-action="AddService" method="post">
+
+                <div class="modal-header">
+                <input type="hidden" class="form-control" id="vendor" name="Vendor" value="@Model.CurrentVendor" />
+                    <h5 class="modal-title" id="addServiceModalLabel">Add New Service</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <div class="mb-3">
+                        <label for="ServiceName" class="form-label">Service Name</label>
+                        <input type="text" class="form-control" id="ServiceName" name="ServiceName" required>
+                    </div>
+                    <div class="mb-3">
+                        <label for="Description" class="form-label">Description</label>
+                        <textarea class="form-control" id="Description" name="Description" rows="3" required></textarea>
+                    </div>
+                    <div class="mb-3">
+                        <label for="Price" class="form-label">Price ($)</label>
+                        <input type="number" class="form-control" id="Price" name="Price" min="0" step="0.01" required>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                    <button type="submit" class="btn btn-primary">Add Service</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<!-- Edit Service Modal -->
+<div class="modal fade" id="editServiceModal" tabindex="-1" aria-labelledby="editServiceModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="editServiceModalLabel">Edit Service</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <form asp-controller="Vendor" asp-action="UpdateService" method="post">
+                <div class="modal-body">
+                    <input type="hidden" id="editServiceId" name="Id" />
+
+                    <div class="mb-3">
+                        <label for="editServiceName" class="form-label">Service Name</label>
+                        <input type="text" class="form-control" id="editServiceName" name="ServiceName" required>
+                    </div>
+
+                    <div class="mb-3">
+                        <label for="editServiceDescription" class="form-label">Description</label>
+                        <textarea class="form-control" id="editServiceDescription" name="Description" rows="3"></textarea>
+                    </div>
+
+                    <div class="mb-3">
+                        <label for="editServicePrice" class="form-label">Price</label>
+                        <div class="input-group">
+                            <span class="input-group-text">$</span>
+                            <input type="number" class="form-control" id="editServicePrice" name="Price" step="0.01" min="0" required>
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                    <button type="submit" class="btn btn-primary">Save Changes</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<!-- View Booking Modal -->
+<div class="modal fade" id="viewBookingModal" tabindex="-1" aria-labelledby="viewBookingModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="viewBookingModalLabel">Booking Details</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body" id="bookingDetails">
+                <div class="mb-3">
+                    <h6>Booking ID</h6>
+                    <p id="modal-booking-id" class="fw-bold"></p>
+                </div>
+                <div class="mb-3">
+                    <h6>Date</h6>
+                    <p id="modal-booking-date"></p>
+                </div>
+                <div class="mb-3">
+                    <h6>Service</h6>
+                    <p id="modal-booking-service"></p>
+                </div>
+                <div class="mb-3">
+                    <h6>Amount</h6>
+                    <p id="modal-booking-amount" class="text-primary fw-bold"></p>
+                </div>
+                <div class="mb-3">
+                    <h6>Status</h6>
+                    <p id="modal-booking-status"></p>
+                </div>
+                <div class="mb-3">
+                    <h6>Payment Status</h6>
+                    <p id="modal-booking-payment"></p>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Update Status Modal -->
+<div class="modal fade" id="updateStatusModal" tabindex="-1" aria-labelledby="updateStatusModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="updateStatusModalLabel">Update Booking Status</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <form asp-controller="Vendor" asp-action="UpdateBooking" method="post">
+                <div class="modal-body">
+                    <input type="hidden" id="updateBookingId" name="Id" />
+
+                    <div class="mb-3">
+                        <label for="bookingStatus" class="form-label">Status</label>
+                        <select class="form-select" id="bookingStatus" name="status" required>
+                            <option value="Pending">Pending</option>
+                            <option value="Confirmed">Confirmed</option>
+                            <option value="Completed">Completed</option>
+                            <option value="Cancelled">Cancelled</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                    <button type="submit" class="btn btn-primary">Update Status</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        // Initialize tooltips
+        var tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'))
+        var tooltipList = tooltipTriggerList.map(function(tooltipTriggerEl) {
+            return new bootstrap.Tooltip(tooltipTriggerEl)
+        })
+
+        // Handle booking modal
+        $('#viewBookingModal').on('show.bs.modal', function(event) {
+            var button = $(event.relatedTarget);
+            var bookingId = button.data('id');
+            var modal = $(this);
+
+            // Load booking details via AJAX
+            $.ajax({
+                url: '/Vendor/GetBookingDetails/' + bookingId,
+                type: 'GET',
+                success: function(data) {
+                    // Update modal with booking details
+                    var bookingDetails = $('#bookingDetails');
+                    // Process and display the data from the controller
+                    // Implementation will depend on the data structure returned
+                },
+                error: function() {
+                    $('#bookingDetails').html('<div class="alert alert-danger">Error loading booking details</div>');
+                }
+            });
+        });
+
+        $('#editServiceModal').on('show.bs.modal', function(event) {
+
+            var button = $(event.relatedTarget);
+            var id = button.data('id');
+            var name = button.data('name');
+            var description = button.data('description');
+            var price = button.data('price');
+
+            // Set values in the form
+            $('#editServiceId').val(id);
+            $('#editServiceName').val(name);
+            $('#editServiceDescription').val(description);
+            $('#editServicePrice').val(price);
+        });
+    </script>
+    <script>
+        // Initialize tooltips
+        var tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'))
+        var tooltipList = tooltipTriggerList.map(function(tooltipTriggerEl) {
+            return new bootstrap.Tooltip(tooltipTriggerEl)
+        })
+
+        // Handle edit service modal
+        $('#editServiceModal').on('show.bs.modal', function(event) {
+            var button = $(event.relatedTarget);
+            var id = button.data('id');
+            var name = button.data('name');
+            var description = button.data('description');
+            var price = button.data('price');
+
+            // Set values in the form
+            $('#editServiceId').val(id);
+            $('#editServiceName').val(name);
+            $('#editServiceDescription').val(description);
+            $('#editServicePrice').val(price);
+        });
+
+        // Handle view booking modal
+        $('#viewBookingModal').on('show.bs.modal', function(event) {
+            var button = $(event.relatedTarget);
+            var bookingId = button.data('id');
+            var date = button.data('date');
+            var service = button.data('service');
+            var amount = button.data('amount');
+            var status = button.data('status');
+            var payment = button.data('payment');
+
+            // Update modal with booking details
+            $('#modal-booking-id').text('#' + bookingId);
+            $('#modal-booking-date').text(date);
+            $('#modal-booking-service').text(service);
+            $('#modal-booking-amount').text('$' + amount);
+
+            var statusClass = status === 'Confirmed' ? 'text-success' :
+                status === 'Pending' ? 'text-warning' :
+                    status === 'Cancelled' ? 'text-danger' : 'text-secondary';
+            $('#modal-booking-status').html('<span class="' + statusClass + '">' + status + '</span>');
+
+            var paymentClass = payment === 'Paid' ? 'text-success' : 'text-danger';
+            $('#modal-booking-payment').html('<span class="' + paymentClass + '">' + payment + '</span>');
+        });
+
+        // Handle update status buttons
+        $('.update-status-btn').on('click', function() {
+            var bookingId = $(this).data('id');
+            var currentStatus = $(this).data('status');
+
+            // Set values in the form
+            $('#updateBookingId').val(bookingId);
+            $('#bookingStatus').val(currentStatus);
+
+            // Show modal
+            var updateStatusModal = new bootstrap.Modal(document.getElementById('updateStatusModal'));
+            updateStatusModal.show();
+        });
+    </script>
+}

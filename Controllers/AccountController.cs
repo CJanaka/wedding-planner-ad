@@ -66,8 +66,6 @@ namespace wedding_planer_ad.Controllers
                 await _userManager.AddToRoleAsync(user, "Couple");
                 await _signInManager.SignInAsync(user, isPersistent: false);
 
-
-
                 var couple = new Couple
                 {
                     UserId = user.Id,

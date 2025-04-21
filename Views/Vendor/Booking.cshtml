@@ -1,0 +1,118 @@
+﻿@model List<wedding_planer_ad.Models.Booking>
+
+@if (Model != null && Model.Any())
+{
+    <div class="table-responsive">
+        <table class="table table-striped">
+            <thead>
+                <tr>
+                    <th>Booking ID</th>
+                    <th>Service</th>
+                    <th>Date</th>
+                    <th>Details</th>
+                    <th>Amount</th>
+                    <th>Status</th>
+                    <th>Payment</th>
+                    <th>Actions</th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (var booking in Model)
+                {
+                    <tr>
+                        <td>#@booking.Id</td>
+                        <td>@booking.ServiceId</td>
+                        <td>@booking.BookingDate.ToString("MMM dd, yyyy")</td>
+                        <td>
+                            <button type="button" class="btn btn-sm btn-link p-0" data-bs-toggle="tooltip" data-bs-placement="top" title="@booking.ServiceDetails">
+                                View Details
+                            </button>
+                        </td>
+                        <td>$@booking.TotalAmount.ToString("N2")</td>
+                        <td>
+                            @if (booking.Status == "Pending")
+                            {
+                                <span class="badge bg-warning text-dark">Pending</span>
+                            }
+                            else if (booking.Status == "Confirmed")
+                            {
+                                <span class="badge bg-success">Confirmed</span>
+                            }
+                            else if (booking.Status == "Cancelled")
+                            {
+                                <span class="badge bg-danger">Cancelled</span>
+                            }
+                            else
+                            {
+                                <span class="badge bg-secondary">@booking.Status</span>
+                            }
+                        </td>
+                        <td>
+                            @if (booking.PaymentStatus == "Paid")
+                            {
+                                <span class="badge bg-success">Paid</span>
+                            }
+                            else if (booking.PaymentStatus == "Pending")
+                            {
+                                <span class="badge bg-warning text-dark">Pending</span>
+                            }
+                            else
+                            {
+                                <span class="badge bg-secondary">@booking.PaymentStatus</span>
+                            }
+                        </td>
+                        <td>
+                            <div class="btn-group">
+                                @if (booking.Status == "Pending")
+                                {
+                                    <form asp-controller="Vendor" asp-action="ConfirmBooking" method="post">
+                                        <input type="hidden" name="bookingId" value="@booking.Id" />
+                                        <button type="submit" class="btn btn-sm btn-success">
+                                            <i class="bi bi-check-lg"></i> Confirm
+                                        </button>
+                                    </form>
+                                }
+                                <a href="#" class="btn btn-sm btn-outline-primary ms-1" data-bs-toggle="modal" data-bs-target="#viewBookingModal" data-id="@booking.Id">
+                                    <i class="bi bi-eye"></i>
+                                </a>
+                            </div>
+                        </td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    </div>
+}
+else
+{
+    <div class="text-center py-5">
+        <i class="bi bi-calendar-x text-muted mb-3" style="font-size: 3rem;"></i>
+        <h5>No bookings found</h5>
+        <p class="text-muted">You don't have any bookings in this category yet</p>
+    </div>
+}
+
+<!-- View Booking Modal -->
+<div class="modal fade" id="viewBookingModal" tabindex="-1" aria-labelledby="viewBookingModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="viewBookingModalLabel">Booking Details</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <!-- Booking details will be loaded dynamically -->
+                <div id="bookingDetails">
+                    <div class="d-flex justify-content-center">
+                        <div class="spinner-border text-primary" role="status">
+                            <span class="visually-hidden">Loading...</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+            </div>
+        </div>
+    </div>
+</div>

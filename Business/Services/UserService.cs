@@ -160,10 +160,12 @@ namespace wedding_planer_ad.Business.Services
             return result;
         }
 
+        public async Task<ApplicationUser> GetByEmail(string mail)
+        {
+            return await _userManager.Users.
+                FirstOrDefaultAsync(u => u.Email == mail);
 
-
-
-
+        }
     }
 
 }

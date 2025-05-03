@@ -291,13 +291,18 @@ namespace wedding_planer_ad.Controllers
 
             try
             {
+                
                 await _plannerService.AddTimelineAsync(timeline);
+                TempData["SuccessMessage"] = "Timeline added successfully!";
                 return RedirectToAction("Dashboard");
             }
             catch (ArgumentException ex)
             {
-                ModelState.AddModelError("CoupleId", ex.Message);
-                return View(timeline);
+                ModelState.AddModelError("AddTimeline Exception", ex.Message);
+                TempData["ErrorMessage"] = "Time line adding failed!";
+
+                return RedirectToAction("Dashboard");
+
             }
         }
 
@@ -316,6 +321,7 @@ namespace wedding_planer_ad.Controllers
 
             await _plannerService.UpdateTimelineAsync(existingTimeline);
 
+            TempData["SuccessMessage"] = "Time line updated!";
             return RedirectToAction("Dashboard");
         }
 
@@ -326,12 +332,14 @@ namespace wedding_planer_ad.Controllers
             var timeline = await _plannerService.GetTimelineByIdAsync(id);
             if (timeline == null)
             {
-                return NotFound();
+                TempData["ErrorMessage"] = "Time line remove failed!";
+                return RedirectToAction("Dashboard");
             }
 
             await _plannerService.DeleteTimelineAsync(id);
 
-            return RedirectToAction("ViewWeddingTimeline");
+            TempData["SuccessMessage"] = "Time line removed!";
+            return RedirectToAction("Dashboard");
         }
 
         //UpdateBudjet

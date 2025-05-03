@@ -7,6 +7,7 @@ namespace wedding_planer_ad.Business.Interfaces
         Task<IEnumerable<Guest>> GetGustsByCoupleId(int id);
         Task<Guest> CreateAsync(Guest guest);
         Task<Guest> UpdateAsync(Guest guest);
+        Task<Guest> RemoveAsync(int guestId);
 
     }
 }

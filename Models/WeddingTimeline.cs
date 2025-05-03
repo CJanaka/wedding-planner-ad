@@ -4,9 +4,9 @@
     {
         public int Id { get; set; }
         public int CoupleId { get; set; }
-        public string EventName { get; set; }
+        public string? EventName { get; set; }
         public DateTime EventTime { get; set; }
-        public string EventDescription { get; set; }
+        public string? EventDescription { get; set; }
         public bool IsDeleted { get; set; }
     }
 }

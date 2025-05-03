@@ -65,20 +65,20 @@
 <form asp-action="Create" method="post" id="guestForm">
     <input type="hidden" id="guestId" name="Guest.Id" value="0" />
     <div class="mb-3">
-        <label asp-for="Guest.FirstName" class="form-label"></label>
+        <label class="form-label">First Name</label>
         <input asp-for="Guest.FirstName" class="form-control" />
         <span asp-validation-for="Guest.FirstName" class="text-danger"></span>
     </div>
     <div class="mb-3">
-        <label asp-for="Guest.LastName" class="form-label"></label>
+        <label class="form-label">Last Name</label>
         <input asp-for="Guest.LastName" class="form-control" />
     </div>
     <div class="mb-3">
-        <label asp-for="Guest.Email" class="form-label"></label>
+        <label class="form-label">Email</label>
         <input asp-for="Guest.Email" type="email" class="form-control" />
     </div>
     <div class="mb-3">
-        <label asp-for="Guest.RSVPStatus" class="form-label"></label>
+        <label class="form-label">RSVP Status</label>
         <select asp-for="Guest.RSVPStatus" class="form-select">
             <option value="Attending">Attending</option>
             <option value="Not Attending">Not Attending</option>
@@ -86,16 +86,16 @@
         </select>
     </div>
     <div class="mb-3">
-        <label asp-for="Guest.MealPreference" class="form-label"></label>
+        <label class="form-label">Meal Preference</label>
         <input asp-for="Guest.MealPreference" class="form-control" />
     </div>
     <div class="mb-3">
-        <label asp-for="Guest.Allergies" class="form-label"></label>
+        <label class="form-label">Allergies</label>
         <input asp-for="Guest.Allergies" class="form-control" />
     </div>
     <div class="mb-3">
-        <label asp-for="Guest.SeatingArrangement" class="form-label"></label>
-        <input asp-for="Guest.SeatingArrangement" class="form-control" />
+        <label class="form-label">Seating Arrangement</label>
+        <input asp-for="Guest.SeatingArrangement" inputmode="numeric" class="form-control" />
     </div>
     <!-- In real app, CoupleId should come from logged-in user -->
     <input type="hidden" asp-for="Guest.CoupleId" value="@Model.CoupleId" />
@@ -103,6 +103,7 @@
     <div class="d-flex">
         <button type="submit" class="btn btn-primary me-2" id="saveButton">Save Guest</button>
         <button type="button" class="btn btn-success" id="updateButton" style="display:none;">Update Guest</button>
+        <button type="button" class="btn btn-danger ms-2" id="removeButton" style="display:none;">Remove Guest</button>
         <button type="button" class="btn btn-secondary ms-2" id="cancelButton" style="display:none;">Cancel</button>
     </div>
 </form>
@@ -137,6 +138,7 @@
                 $('#saveButton').hide();
                 $('#updateButton').show();
                 $('#cancelButton').show();
+                $('#removeButton').show();
 
                 // Scroll to form
                 $('html, body').animate({
@@ -153,6 +155,13 @@
             $('#updateButton').click(function() {
                 // Change form action to Update
                 $('#guestForm').attr('action', '@Url.Action("Update")');
+                $('#guestForm').submit();
+            });
+            
+            // remove button submits to different action
+            $('#removeButton').click(function() {
+                // Change form action to remove
+                $('#guestForm').attr('action', '@Url.Action("Remove")');
                 $('#guestForm').submit();
             });
 

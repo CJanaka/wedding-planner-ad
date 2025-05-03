@@ -31,6 +31,19 @@ namespace wedding_planer_ad.Business.Services
                 .ToListAsync();
         }
 
+        public async Task<Guest> RemoveAsync(int guestId)
+        {
+            var existing = await _context.Guest.FindAsync(guestId);
+
+            if (existing == null || existing.IsDeleted)
+                throw new ResourceNotFoundException($"guest with id {guestId} not found.");
+            
+            existing.IsDeleted = true;
+
+            await _context.SaveChangesAsync();
+            return existing;
+        }
+
         public async Task<Guest> UpdateAsync(Guest guest)
         {
             var existing = await _context.Guest.FindAsync(guest.Id);
